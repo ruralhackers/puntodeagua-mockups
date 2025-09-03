@@ -2,67 +2,36 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 
 export default function NuevoMantenimientoPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    titulo: '',
-    tipo: '',
-    estado: '',
-    puntoAgua: '',
-    fechaProgramada: '',
-    fechaRealizada: '',
-    horaInicio: '',
-    horaFin: '',
-    responsable: '',
-    equipos: '',
-    descripcion: '',
-    actividadesRealizadas: '',
-    repuestosUtilizados: '',
-    observaciones: '',
-    proximoMantenimiento: ''
+    objetoMantenimiento: '',
+    otroObjeto: '',
+    fechaRealizacion: '',
+    descripcionNotas: '',
+    personaEmpresa: '',
+    zona: '',
+    proveedor: '',
+    archivo: null as File | null
   });
 
-  const tiposMantenimiento = [
-    'Preventivo',
-    'Correctivo',
-    'Predictivo',
-    'Emergencia',
-    'Inspección',
-    'Limpieza',
-    'Calibración',
-    'Reparación'
+  const objetosMantenimiento = [
+    'Depósito',
+    'Manantiales',
+    'Pozos',
+    'Bombas',
+    'Otros'
   ];
 
-  const estados = [
-    { value: 'programado', label: 'Programado', color: 'text-blue-600' },
-    { value: 'en-proceso', label: 'En Proceso', color: 'text-yellow-600' },
-    { value: 'completado', label: 'Completado', color: 'text-green-600' },
-    { value: 'cancelado', label: 'Cancelado', color: 'text-red-600' }
-  ];
-
-  const puntosAgua = [
-    'Pozo Principal',
-    'Tanque Elevado Norte',
-    'Tanque Elevado Sur',
-    'Red Distribución Centro',
-    'Red Distribución Periferia',
-    'Estación de Bombeo',
-    'Sistema de Cloración',
-    'Válvulas Principales'
-  ];
-
-  const equipos = [
-    'Bomba sumergible',
-    'Motor eléctrico',
-    'Tablero de control',
-    'Válvulas',
-    'Medidores',
-    'Sistema de cloración',
-    'Tuberías',
-    'Tanques',
-    'Sensores',
-    'Otro'
+  const zonas = [
+    'Os Casas',
+    'Centro',
+    'Ramis'
   ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -70,6 +39,14 @@ export default function NuevoMantenimientoPage() {
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFormData(prev => ({
+      ...prev,
+      archivo: file
     }));
   };
 
@@ -100,284 +77,149 @@ export default function NuevoMantenimientoPage() {
 
       {/* Formulario */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Información básica */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Información Básica</h3>
+        {/* Información Básica */}
+        <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-slate-800 border-b border-slate-300 pb-3 mb-4">📋 Información Básica</h2>
           
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Título del Mantenimiento *
-              </label>
-              <input
-                type="text"
-                name="titulo"
-                value={formData.titulo}
+              <Label htmlFor="objetoMantenimiento">Objeto del Mantenimiento *</Label>
+              <select
+                id="objetoMantenimiento"
+                name="objetoMantenimiento"
+                value={formData.objetoMantenimiento}
                 onChange={handleInputChange}
                 required
-                placeholder="Describe brevemente el mantenimiento"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+              >
+                <option value="">Selecciona el objeto del mantenimiento</option>
+                {objetosMantenimiento.map((objeto) => (
+                  <option key={objeto} value={objeto}>{objeto}</option>
+                ))}
+              </select>
+            </div>
+
+            {formData.objetoMantenimiento === 'Otros' && (
+              <div>
+                <Label htmlFor="otroObjeto">Especifica el objeto *</Label>
+                <Input
+                  id="otroObjeto"
+                  name="otroObjeto"
+                  value={formData.otroObjeto}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="Describe el objeto del mantenimiento"
+                />
+              </div>
+            )}
+
+            <div>
+              <Label htmlFor="fechaRealizacion">Fecha de Realización *</Label>
+              <Input
+                id="fechaRealizacion"
+                name="fechaRealizacion"
+                type="date"
+                value={formData.fechaRealizacion}
+                onChange={handleInputChange}
+                required
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tipo de Mantenimiento *
-                </label>
-                <select
-                  name="tipo"
-                  value={formData.tipo}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Selecciona un tipo</option>
-                  {tiposMantenimiento.map((tipo) => (
-                    <option key={tipo} value={tipo}>{tipo}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Estado *
-                </label>
-                <select
-                  name="estado"
-                  value={formData.estado}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Selecciona estado</option>
-                  {estados.map((estado) => (
-                    <option key={estado.value} value={estado.value}>
-                      {estado.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div>
+              <Label htmlFor="personaEmpresa">Persona/Empresa que realiza el mantenimiento *</Label>
+              <Input
+                id="personaEmpresa"
+                name="personaEmpresa"
+                value={formData.personaEmpresa}
+                onChange={handleInputChange}
+                required
+                placeholder="Nombre de la persona o empresa responsable"
+              />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Punto de Agua *
-              </label>
+              <Label htmlFor="zona">Zona del Mantenimiento *</Label>
               <select
-                name="puntoAgua"
-                value={formData.puntoAgua}
+                id="zona"
+                name="zona"
+                value={formData.zona}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
               >
-                <option value="">Selecciona un punto</option>
-                {puntosAgua.map((punto) => (
-                  <option key={punto} value={punto}>{punto}</option>
+                <option value="">Selecciona la zona</option>
+                {zonas.map((zona) => (
+                  <option key={zona} value={zona}>{zona}</option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Equipos/Componentes *
-              </label>
-              <select
-                name="equipos"
-                value={formData.equipos}
+              <Label htmlFor="proveedor">Proveedor del Producto (opcional)</Label>
+              <Input
+                id="proveedor"
+                name="proveedor"
+                value={formData.proveedor}
                 onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Selecciona equipo</option>
-                {equipos.map((equipo) => (
-                  <option key={equipo} value={equipo}>{equipo}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Responsable *
-              </label>
-              <input
-                type="text"
-                name="responsable"
-                value={formData.responsable}
-                onChange={handleInputChange}
-                required
-                placeholder="Nombre del responsable"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Nombre del proveedor si se utilizó algún producto"
               />
             </div>
           </div>
         </div>
 
-        {/* Fechas y horarios */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Fechas y Horarios</h3>
-          
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Fecha Programada *
-              </label>
-              <input
-                type="date"
-                name="fechaProgramada"
-                value={formData.fechaProgramada}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Fecha Realizada
-              </label>
-              <input
-                type="date"
-                name="fechaRealizada"
-                value={formData.fechaRealizada}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hora de Inicio
-                </label>
-                <input
-                  type="time"
-                  name="horaInicio"
-                  value={formData.horaInicio}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hora de Fin
-                </label>
-                <input
-                  type="time"
-                  name="horaFin"
-                  value={formData.horaFin}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Descripción */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Descripción</h3>
+        {/* Descripción/Notas */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-blue-800 border-b border-blue-300 pb-3 mb-4">📝 Descripción/Notas</h2>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Descripción del mantenimiento *
-            </label>
-            <textarea
-              name="descripcion"
-              value={formData.descripcion}
+            <Label htmlFor="descripcionNotas">Descripción del mantenimiento *</Label>
+            <Textarea
+              id="descripcionNotas"
+              name="descripcionNotas"
+              value={formData.descripcionNotas}
               onChange={handleInputChange}
               required
               rows={4}
-              placeholder="Describe las actividades de mantenimiento a realizar o realizadas"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Describe detalladamente las actividades de mantenimiento realizadas"
             />
           </div>
         </div>
 
-        {/* Actividades realizadas */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Actividades Realizadas</h3>
+        {/* Documentación */}
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-amber-800 border-b border-amber-300 pb-3 mb-4">📎 Documentación</h2>
           
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Actividades realizadas
-              </label>
-              <textarea
-                name="actividadesRealizadas"
-                value={formData.actividadesRealizadas}
-                onChange={handleInputChange}
-                rows={3}
-                placeholder="Detalla las actividades específicas que se realizaron"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Repuestos utilizados
-              </label>
-              <textarea
-                name="repuestosUtilizados"
-                value={formData.repuestosUtilizados}
-                onChange={handleInputChange}
-                rows={2}
-                placeholder="Lista los repuestos o materiales utilizados"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Seguimiento */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Seguimiento</h3>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Próximo mantenimiento
-              </label>
-              <input
-                type="date"
-                name="proximoMantenimiento"
-                value={formData.proximoMantenimiento}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Observaciones
-              </label>
-              <textarea
-                name="observaciones"
-                value={formData.observaciones}
-                onChange={handleInputChange}
-                rows={3}
-                placeholder="Observaciones adicionales, recomendaciones, etc."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+          <div>
+            <Label htmlFor="archivo">Subir archivo (fotos, videos, PDFs)</Label>
+            <Input
+              id="archivo"
+              name="archivo"
+              type="file"
+              onChange={handleFileChange}
+              accept=".jpg,.jpeg,.png,.pdf,.mp4,.mov"
+            />
+            <p className="text-sm text-amber-600 mt-1">
+              Formatos permitidos: JPG, PNG, PDF, MP4, MOV
+            </p>
           </div>
         </div>
 
         {/* Botones */}
         <div className="flex gap-3">
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={() => router.back()}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex-1"
           >
             Cancelar
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
-            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex-1"
           >
             Guardar Mantenimiento
-          </button>
+          </Button>
         </div>
       </form>
     </div>

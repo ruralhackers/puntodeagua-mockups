@@ -125,22 +125,14 @@ export default function Home() {
       </header>
       
       <main className="flex-1 px-3 py-4">
-        {/* Botones principales destacados */}
-        <div className="flex gap-3 mb-6">
+        {/* Botón principal destacado */}
+        <div className="mb-6">
           <Button 
             size="lg" 
-            className="flex-1" 
+            className="w-full" 
             onClick={() => router.push('/dashboard/nuevo-registro')}
           >
             Nuevo Registro
-          </Button>
-          <Button 
-            size="lg" 
-            variant="outline" 
-            className="flex-1" 
-            onClick={() => router.push('/dashboard/incidencias/nueva')}
-          >
-            Nueva Incidencia
           </Button>
         </div>
 
