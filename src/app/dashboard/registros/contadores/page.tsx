@@ -9,6 +9,7 @@ import { Search, AlertTriangle, Filter, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { BackButton } from '@/components/ui/back-button';
 
 type Counter = {
   id: number;
@@ -131,6 +132,9 @@ export default function ContadoresPage() {
 
   return (
     <div className="px-3 py-4 pb-20">
+      <div className="mb-4">
+        <BackButton href="/dashboard/registros" />
+      </div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Contadores</h1>
         <p className="text-gray-600">Gestión de contadores y control de consumos</p>

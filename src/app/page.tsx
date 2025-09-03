@@ -23,88 +23,123 @@ export default function Home() {
       prioridad: "Media",
       fecha: "2024-01-14",
       tipo: "incidencia"
-    },
-    {
-      id: 3,
-      titulo: "Calidad del agua cuestionable",
-      ubicacion: "Pozo Central",
-      prioridad: "Alta",
-      fecha: "2024-01-13",
-      tipo: "incidencia"
     }
   ];
 
-  const tareasPasadas = [
+  const recordatoriosVencidos = [
     {
       id: 1,
-      titulo: "Inspección mensual Pozo A",
-      fechaVencimiento: "2024-01-10",
-      tipo: "tarea",
-      subtipo: "Mantenimiento",
-      estado: "Pendiente"
+      titulo: "Lectura mensual de contadores",
+      tipoRegistro: "contador",
+      fechaVencimiento: "2024-01-18",
+      tipo: "recordatorio",
+      periodicidad: "mensual"
     },
     {
       id: 2,
       titulo: "Análisis de calidad del agua",
-      fechaVencimiento: "2024-01-12",
-      tipo: "tarea",
-      subtipo: "Análisis",
-      estado: "Pendiente"
-    },
-    {
-      id: 3,
-      titulo: "Revisión de válvulas",
-      fechaVencimiento: "2024-01-08",
-      tipo: "tarea",
-      subtipo: "Mantenimiento",
-      estado: "Pendiente"
+      tipoRegistro: "analitica",
+      fechaVencimiento: "2024-01-19",
+      tipo: "recordatorio",
+      periodicidad: "semanal"
     }
   ];
 
-  // Combinar incidencias y tareas pasadas para el bloque "Requiere Atención"
+  // Combinar incidencias y recordatorios vencidos para el bloque "Requiere Atención"
   const elementosAtencion = [
-    ...incidenciasAbiertas.slice(0, 2),
-    ...tareasPasadas.slice(0, 2)
+    ...incidenciasAbiertas,
+    ...recordatoriosVencidos
   ];
 
-  const tareasFuturas = [
+  // Datos de ejemplo para recordatorios con fechas actuales
+  const hoy = new Date();
+  const mañana = new Date(hoy);
+  mañana.setDate(hoy.getDate() + 1);
+  const enTresDias = new Date(hoy);
+  enTresDias.setDate(hoy.getDate() + 3);
+  const enCincoDias = new Date(hoy);
+  enCincoDias.setDate(hoy.getDate() + 5);
+  const enDiezDias = new Date(hoy);
+  enDiezDias.setDate(hoy.getDate() + 10);
+  
+  const recordatorios = [
     {
       id: 1,
-      titulo: "Limpieza de tanque principal",
-      fecha: "2024-01-20",
-      tipo: "Mantenimiento"
+      titulo: "Lectura mensual de contadores",
+      tipoRegistro: "contador",
+      fecha: hoy.toISOString().split('T')[0],
+      periodicidad: "mensual"
     },
     {
       id: 2,
-      titulo: "Inspección de bombas",
-      fecha: "2024-01-22",
-      tipo: "Mantenimiento"
+      titulo: "Análisis de calidad del agua",
+      tipoRegistro: "analitica",
+      fecha: mañana.toISOString().split('T')[0],
+      periodicidad: "semanal"
     },
     {
       id: 3,
-      titulo: "Análisis bacteriológico",
-      fecha: "2024-01-25",
-      tipo: "Análisis"
+      titulo: "Mantenimiento preventivo bombas",
+      tipoRegistro: "mantenimiento",
+      fecha: enTresDias.toISOString().split('T')[0],
+      periodicidad: "trimestral"
     },
     {
       id: 4,
-      titulo: "Revisión de medidores",
-      fecha: "2024-01-28",
-      tipo: "Mantenimiento"
+      titulo: "Inspección de válvulas",
+      tipoRegistro: "mantenimiento",
+      fecha: enCincoDias.toISOString().split('T')[0],
+      periodicidad: "mensual"
     },
     {
       id: 5,
-      titulo: "Mantenimiento preventivo",
-      fecha: "2024-02-01",
-      tipo: "Mantenimiento"
-    },
-    {
-      id: 6,
-      titulo: "Control de presión",
-      fecha: "2024-02-03",
-      tipo: "Análisis"
+      titulo: "Control de cloro residual",
+      tipoRegistro: "analitica",
+      fecha: enDiezDias.toISOString().split('T')[0],
+      periodicidad: "semanal"
     }
   ];
+
+  // Función para obtener el día de la semana en español
+  const obtenerDiaSemana = (fecha: string) => {
+    const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const fechaObj = new Date(fecha + 'T00:00:00');
+    return diasSemana[fechaObj.getDay()];
+  };
+
+  // Función para formatear fecha con día de la semana
+  const formatearFechaConDia = (fecha: string) => {
+    const diaSemana = obtenerDiaSemana(fecha);
+    return `${fecha} (${diaSemana})`;
+  };
+
+  // Función para categorizar fechas
+  const categorizarFecha = (fecha: string) => {
+    const hoy = new Date();
+    const fechaTarea = new Date(fecha + 'T00:00:00');
+    const diffTime = fechaTarea.getTime() - hoy.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      return 'hoy';
+    } else if (diffDays > 0 && diffDays <= 7) {
+      return 'esta-semana';
+    } else {
+      return 'proximamente';
+    }
+  };
+
+  // Agrupar recordatorios por categoría temporal
+  const recordatoriosAgrupados = recordatorios.reduce((grupos, recordatorio) => {
+    const categoria = categorizarFecha(recordatorio.fecha);
+    if (!grupos[categoria]) grupos[categoria] = {};
+    
+    const fecha = recordatorio.fecha;
+    if (!grupos[categoria][fecha]) grupos[categoria][fecha] = [];
+    grupos[categoria][fecha].push(recordatorio);
+    
+    return grupos;
+  }, {} as Record<string, Record<string, typeof recordatorios>>);
 
   return (
     <div className="flex flex-col">
@@ -147,22 +182,15 @@ export default function Home() {
               {elementosAtencion.map((elemento) => (
                 <div 
                   key={`${elemento.tipo}-${elemento.id}`} 
-                  className="p-3 bg-gray-50 rounded-md cursor-pointer hover:bg-gray-100 transition-colors"
-                  onClick={() => {
-                    if (elemento.tipo === 'incidencia') {
-                      router.push(`/dashboard/incidencias/${elemento.id}/editar`);
-                    } else {
-                      router.push(`/dashboard/tareas/${elemento.id}/registro`);
-                    }
-                  }}
+                  className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
                 >
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className={`px-2 py-1 text-xs rounded-full ${
                           elemento.tipo === 'incidencia' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'
                         }`}>
-                          {elemento.tipo === 'incidencia' ? 'Incidencia' : 'Tarea Vencida'}
+                          {elemento.tipo === 'incidencia' ? 'Incidencia' : 'Recordatorio Vencido'}
                         </span>
                         {elemento.tipo === 'incidencia' && 'prioridad' in elemento && (
                            <span className={`px-2 py-1 text-xs rounded-full ${
@@ -182,12 +210,34 @@ export default function Home() {
                          }
                        </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-500">Editar</span>
-                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                    </div>
+                  </div>
+                  <div className="flex justify-end">
+                    <span 
+                      className="text-xs text-blue-600 cursor-pointer hover:text-blue-800"
+                      onClick={() => {
+                        if (elemento.tipo === 'incidencia') {
+                          // Crear parámetros URL con los datos disponibles de la incidencia
+                          const params = new URLSearchParams({
+                            descripcion: elemento.titulo || '',
+                            estado: 'abierta',
+                            zona: 'ubicacion' in elemento ? elemento.ubicacion : '',
+                            fechaApertura: 'fecha' in elemento ? elemento.fecha : new Date().toISOString().split('T')[0]
+                          });
+                          router.push(`/dashboard/nuevo-registro/incidencia?${params.toString()}`);
+                        } else if (elemento.tipo === 'recordatorio' && 'tipoRegistro' in elemento) {
+                          // Redirigir a la página de nuevo registro del tipo correspondiente
+                          if (elemento.tipoRegistro === 'contador') {
+                            router.push('/dashboard/nuevo-registro/contador');
+                          } else if (elemento.tipoRegistro === 'analitica') {
+                            router.push('/dashboard/nuevo-registro/analitica');
+                          } else if (elemento.tipoRegistro === 'mantenimiento') {
+                            router.push('/dashboard/nuevo-registro/mantenimiento');
+                          }
+                        }
+                      }}
+                    >
+                      {elemento.tipo === 'incidencia' ? 'Ver Incidencia' : 'Añadir Registro'}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -197,58 +247,94 @@ export default function Home() {
              </a>
           </div>
 
-          {/* Tareas Programadas - Integradas en el lobby */}
+          {/* Recordatorios - Reemplaza las Próximas Tareas */}
           <div className="space-y-3">
             <h2 className="text-lg font-semibold text-gray-900">Próximas Tareas</h2>
-            {/* Agrupar por día */}
-            {Object.entries(
-              tareasFuturas.reduce((grupos, tarea) => {
-                const fecha = tarea.fecha;
-                if (!grupos[fecha]) grupos[fecha] = [];
-                grupos[fecha].push(tarea);
-                return grupos;
-              }, {} as Record<string, typeof tareasFuturas>)
-            ).map(([fecha, tareas]) => (
-              <div key={fecha} className="mb-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-2 px-2">{fecha}</h3>
-                <div className="space-y-2">
-                  {tareas.map((tarea) => {
-                    const getTipoColor = (tipo: string) => {
-                      switch (tipo) {
-                        case 'Mantenimiento':
-                          return 'bg-orange-100 text-orange-800';
-                        case 'Análisis':
-                          return 'bg-green-100 text-green-800';
-                        case 'Inspección':
-                          return 'bg-blue-100 text-blue-800';
-                        default:
-                          return 'bg-gray-100 text-gray-800';
-                      }
-                    };
+            {/* Mostrar categorías temporales */}
+            {['hoy', 'esta-semana', 'proximamente'].map(categoria => {
+              const tituloCategoria = categoria === 'hoy' ? 'Hoy' : 
+                                    categoria === 'esta-semana' ? 'Esta Semana' : 'Próximamente';
+              
+              if (!recordatoriosAgrupados[categoria] || Object.keys(recordatoriosAgrupados[categoria]).length === 0) {
+                return null;
+              }
+              
+              return (
+                <div key={categoria} className="mb-6">
+                  <h3 className="text-base font-semibold text-gray-800 mb-3 px-2">{tituloCategoria}</h3>
+                  {Object.entries(recordatoriosAgrupados[categoria]).map(([fecha, recordatoriosDelDia]) => (
+                    <div key={fecha} className="mb-4">
+                      <h4 className="text-sm font-medium text-gray-700 mb-2 px-2">{formatearFechaConDia(fecha)}</h4>
+                      <div className="space-y-2">
+                        {recordatoriosDelDia.map((recordatorio) => {
+                          const getTipoColor = (tipo: string) => {
+                            switch (tipo) {
+                              case 'contador':
+                                return 'bg-purple-100 text-purple-800';
+                              case 'analitica':
+                                return 'bg-green-100 text-green-800';
+                              case 'mantenimiento':
+                                return 'bg-orange-100 text-orange-800';
+                              default:
+                                return 'bg-gray-100 text-gray-800';
+                            }
+                          };
 
-                    return (
-                      <button
-                        key={tarea.id}
-                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors text-left"
-                        onClick={() => {
-                           // Navegar a la ficha de la tarea para añadir registro
-                           router.push(`/dashboard/tareas/${tarea.id}/registro`);
-                         }}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className="font-medium text-sm text-gray-900">{tarea.titulo}</h4>
-                          </div>
-                          <span className={`px-2 py-1 text-xs rounded-full font-medium ${getTipoColor(tarea.tipo)}`}>
-                            {tarea.tipo}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
+                          const getTipoLabel = (tipo: string) => {
+                            switch (tipo) {
+                              case 'contador':
+                                return 'Contadores';
+                              case 'analitica':
+                                return 'Análisis';
+                              case 'mantenimiento':
+                                return 'Mantenimiento';
+                              default:
+                                return tipo;
+                            }
+                          };
+
+                          return (
+                            <button
+                              key={recordatorio.id}
+                              className="w-full p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors text-left"
+                              onClick={() => {
+                                // Redirigir a la página de nuevo registro del tipo correspondiente
+                                if (recordatorio.tipoRegistro === 'contador') {
+                                  router.push('/dashboard/nuevo-registro/contador');
+                                } else if (recordatorio.tipoRegistro === 'analitica') {
+                                  router.push('/dashboard/nuevo-registro/analitica');
+                                } else if (recordatorio.tipoRegistro === 'mantenimiento') {
+                                  router.push('/dashboard/nuevo-registro');
+                                }
+                              }}
+                            >
+                              <div>
+                                <div className="mb-3">
+                                  <h4 className="font-medium text-sm text-gray-900">{recordatorio.titulo}</h4>
+                                  <p className="text-xs text-gray-600 mt-1">
+                                    {recordatorio.periodicidad}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${getTipoColor(recordatorio.tipoRegistro)}`}>
+                                      {getTipoLabel(recordatorio.tipoRegistro)}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <span className="text-blue-600 text-xs font-medium">
+                                    Añadir Registro
+                                  </span>
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </main>

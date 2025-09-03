@@ -1,40 +1,22 @@
 export default function MasPage() {
   const menuItems = [
     {
-      title: "Tareas",
-      description: "Gestionar tareas y recordatorios",
-      href: "/dashboard/tareas",
-      icon: "📋"
-    },
-    {
-      title: "Incidencias",
-      description: "Ver y reportar incidencias",
-      href: "/dashboard/incidencias",
-      icon: "⚠️"
-    },
-    {
       title: "Usuarios",
-      description: "Gestión de usuarios del sistema",
+      description: "Administra los usuarios del sistema",
       href: "/dashboard/usuarios",
       icon: "👥"
     },
     {
-      title: "Puntos de Agua",
-      description: "Administrar puntos de agua",
-      href: "/dashboard/puntos-agua",
+      title: "Contadores",
+      description: "Gestiona contadores y puntos de agua",
+      href: "/dashboard/contadores",
       icon: "💧"
     },
     {
-      title: "Configuración",
-      description: "Ajustes del sistema",
-      href: "/dashboard/configuracion",
-      icon: "⚙️"
-    },
-    {
-      title: "Ayuda",
-      description: "Soporte y documentación",
-      href: "/dashboard/ayuda",
-      icon: "❓"
+      title: "Crear Recordatorio",
+      description: "Programa recordatorios para registros",
+      href: "/dashboard/recordatorios/nuevo",
+      icon: "⏰"
     }
   ];
 

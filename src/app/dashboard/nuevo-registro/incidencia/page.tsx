@@ -1,7 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { ArrowLeft, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function NuevaIncidenciaPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     descripcion: '',
     estado: 'abierta',
@@ -18,6 +19,27 @@ export default function NuevaIncidenciaPage() {
     personaFirma: '',
     zona: ''
   });
+
+  // Prellenar formulario si vienen datos por URL
+  useEffect(() => {
+    const descripcion = searchParams.get('descripcion');
+    const estado = searchParams.get('estado');
+    const zona = searchParams.get('zona');
+    const personaFirma = searchParams.get('personaFirma');
+    const fechaApertura = searchParams.get('fechaApertura');
+    const fechaResolucion = searchParams.get('fechaResolucion');
+
+    if (descripcion || estado || zona || personaFirma || fechaApertura || fechaResolucion) {
+      setFormData({
+        descripcion: descripcion || '',
+        estado: estado || 'abierta',
+        fechaApertura: fechaApertura || new Date().toISOString().split('T')[0],
+        fechaResolucion: fechaResolucion || '',
+        personaFirma: personaFirma || '',
+        zona: zona || ''
+      });
+    }
+  }, [searchParams]);
 
   const zonas = ['Os Casas', 'Centro', 'Ramis'];
   const estados = [
