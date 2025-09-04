@@ -7,10 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, AlertCircle, CheckCircle } from 'lucide-react';
+import { FormHeader } from '@/components/ui/form-header';
+import { useTabBar } from '@/contexts/TabBarContext';
 
 export default function NuevaIncidenciaPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { hideTabBar, showTabBar } = useTabBar();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     descripcion: '',
     estado: 'abierta',
@@ -19,6 +23,14 @@ export default function NuevaIncidenciaPage() {
     personaFirma: '',
     zona: ''
   });
+
+  // Esconder TabBar al montar el componente
+  useEffect(() => {
+    hideTabBar();
+    return () => {
+      showTabBar();
+    };
+  }, [hideTabBar, showTabBar]);
 
   // Prellenar formulario si vienen datos por URL
   useEffect(() => {
@@ -55,6 +67,17 @@ export default function NuevaIncidenciaPage() {
            (formData.estado === 'cerrada' && formData.fechaResolucion !== '');
   };
 
+  // Validar campos obligatorios
+  const isFormValid = () => {
+    return (
+      formData.descripcion.trim() !== '' &&
+      formData.personaFirma.trim() !== '' &&
+      formData.zona !== '' &&
+      formData.fechaApertura !== '' &&
+      (formData.estado === 'abierta' || formData.fechaResolucion !== '')
+    );
+  };
+
   // Manejar navegación con confirmación
   const manejarVolver = () => {
     if (hayDatosSinGuardar()) {
@@ -63,6 +86,22 @@ export default function NuevaIncidenciaPage() {
       }
     } else {
       router.back();
+    }
+  };
+
+  const handleSave = async () => {
+    if (!isFormValid()) return;
+    
+    setIsLoading(true);
+    try {
+      console.log('Datos de la incidencia:', formData);
+      // Aquí iría la lógica para enviar los datos al servidor
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simular guardado
+      router.push('/dashboard/registros');
+    } catch (error) {
+      console.error('Error al guardar:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -85,28 +124,22 @@ export default function NuevaIncidenciaPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Datos de la incidencia:', formData);
-    router.push('/dashboard/registros');
+    handleSave();
   };
 
   return (
-    <div className="px-3 py-4 pb-20">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <button
-          onClick={manejarVolver}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Nueva Incidencia</h1>
-          <p className="text-gray-600">Registra una nueva incidencia en el sistema</p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <FormHeader
+        tipoRegistro="Incidencia"
+        onCancel={manejarVolver}
+        onSave={handleSave}
+        canSave={isFormValid()}
+        isLoading={isLoading}
+      />
 
-      {/* Formulario */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="px-3 py-4">
+        {/* Formulario */}
+        <form onSubmit={handleSubmit} className="space-y-6">
         {/* Información Básica y Descripción */}
         <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 space-y-4">
           <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-300 pb-3 mb-4">📋 Información Básica</h3>
@@ -294,24 +327,8 @@ export default function NuevaIncidenciaPage() {
           </div>
         )}
 
-        {/* Botones */}
-        <div className="flex gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={manejarVolver}
-            className="flex-1"
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            className="flex-1"
-          >
-            Registrar Incidencia
-          </Button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

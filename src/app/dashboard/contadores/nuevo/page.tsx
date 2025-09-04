@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Save, MapPin, User, Droplets, Camera } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { FormHeader } from '@/components/ui/form-header';
+import { useTabBar } from '@/contexts/TabBarContext';
 
 interface ContadorFormData {
   idUsuario: number;
@@ -39,6 +41,8 @@ interface FormErrors {
 
 export default function NuevoContadorPage() {
   const router = useRouter();
+  const { hideTabBar, showTabBar } = useTabBar();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<ContadorFormData>({
     idUsuario: 0,
     nombre: '',
@@ -92,9 +96,30 @@ export default function NuevoContadorPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (validateForm()) {
+  // Esconder TabBar al montar el componente
+  useEffect(() => {
+    hideTabBar();
+    return () => {
+      showTabBar();
+    };
+  }, [hideTabBar, showTabBar]);
+
+  // Validar si el formulario es válido
+  const isFormValid = () => {
+    return validateForm();
+  };
+
+  const handleCancel = () => {
+    if (window.confirm('¿Estás seguro de que quieres cancelar? Los datos no guardados se perderán.')) {
+      router.back();
+    }
+  };
+
+  const handleSave = async () => {
+    if (!validateForm()) return;
+    
+    setIsLoading(true);
+    try {
       // Generar ID de usuario automáticamente si no está establecido
       if (formData.idUsuario === 0) {
         generateIdUsuario();
@@ -104,9 +129,18 @@ export default function NuevoContadorPage() {
       
       // Aquí se enviarían los datos al backend
       console.log('Datos del contador:', updatedFormData);
-      alert('Contador creado exitosamente');
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simular guardado
       router.push('/dashboard/contadores');
+    } catch (error) {
+      console.error('Error al guardar:', error);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSave();
   };
 
   const handleInputChange = (field: keyof ContadorFormData, value: string | number) => {
@@ -129,23 +163,17 @@ export default function NuevoContadorPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
-        <Link href="/dashboard/contadores">
-          <Button variant="outline" size="sm" className="whitespace-nowrap w-fit">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver
-          </Button>
-        </Link>
-        <div className="min-w-0">
-          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">Nuevo Contador</h1>
-          <p className="text-muted-foreground text-sm lg:text-base">
-            Registra un nuevo contador/punto de agua en el sistema
-          </p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <FormHeader
+        tipoRegistro="Contador"
+        onCancel={handleCancel}
+        onSave={handleSave}
+        canSave={isFormValid()}
+        isLoading={isLoading}
+      />
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="px-4 py-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
         {/* Datos de la Persona */}
         <Card>
           <CardHeader>
@@ -327,17 +355,8 @@ export default function NuevoContadorPage() {
           </CardContent>
         </Card>
 
-        {/* Botones de acción */}
-        <div className="flex justify-end gap-4">
-          <Link href="/dashboard/contadores">
-            <Button variant="outline">Cancelar</Button>
-          </Link>
-          <Button type="submit" className="flex items-center gap-2">
-            <Save className="h-4 w-4" />
-            Guardar Contador
-          </Button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

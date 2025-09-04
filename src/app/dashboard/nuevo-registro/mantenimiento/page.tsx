@@ -1,14 +1,18 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { FormHeader } from '@/components/ui/form-header';
+import { useTabBar } from '@/contexts/TabBarContext';
 
 export default function NuevoMantenimientoPage() {
   const router = useRouter();
+  const { hideTabBar, showTabBar } = useTabBar();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     objetoMantenimiento: '',
     otroObjeto: '',
@@ -50,33 +54,64 @@ export default function NuevoMantenimientoPage() {
     }));
   };
 
+  // Esconder TabBar al montar el componente
+  useEffect(() => {
+    hideTabBar();
+    return () => {
+      showTabBar();
+    };
+  }, [hideTabBar, showTabBar]);
+
+  // Validar campos obligatorios
+  const isFormValid = () => {
+    return (
+      formData.objetoMantenimiento !== '' &&
+      formData.fechaRealizacion !== '' &&
+      formData.descripcionNotas.trim() !== '' &&
+      formData.zona !== ''
+    );
+  };
+
+  const handleCancel = () => {
+    if (window.confirm('¿Estás seguro de que quieres cancelar? Los datos no guardados se perderán.')) {
+      router.back();
+    }
+  };
+
+  const handleSave = async () => {
+    if (!isFormValid()) return;
+    
+    setIsLoading(true);
+    try {
+      console.log('Datos del mantenimiento:', formData);
+      // Aquí iría la lógica para guardar el mantenimiento
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simular guardado
+      router.push('/dashboard/registros/mantenimiento');
+    } catch (error) {
+      console.error('Error al guardar:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Datos del mantenimiento:', formData);
-    // Aquí iría la lógica para guardar el mantenimiento
-    router.push('/dashboard/registros/mantenimiento');
+    handleSave();
   };
 
   return (
-    <div className="px-3 py-4 pb-20">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <button
-          onClick={() => router.back()}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Nuevo Mantenimiento</h1>
-          <p className="text-gray-600">Registra una actividad de mantenimiento</p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <FormHeader
+        tipoRegistro="Mantenimiento"
+        onCancel={handleCancel}
+        onSave={handleSave}
+        canSave={isFormValid()}
+        isLoading={isLoading}
+      />
 
       {/* Formulario */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="px-4 py-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
         {/* Información Básica */}
         <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 space-y-4">
           <h2 className="text-lg font-semibold text-slate-800 border-b border-slate-300 pb-3 mb-4">📋 Información Básica</h2>
@@ -204,24 +239,8 @@ export default function NuevoMantenimientoPage() {
           </div>
         </div>
 
-        {/* Botones */}
-        <div className="flex gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-            className="flex-1"
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            className="flex-1"
-          >
-            Guardar Mantenimiento
-          </Button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

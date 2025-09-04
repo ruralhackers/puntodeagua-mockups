@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { TabBar } from "@/components/ui/navigation/tab-bar";
+import { TabBarProvider } from "@/contexts/TabBarContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,12 +19,14 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        <div className="flex flex-col min-h-screen">
-          <div className="flex-1 pb-16 md:pb-0">
-            {children}
+        <TabBarProvider>
+          <div className="flex flex-col min-h-screen">
+            <div className="flex-1 pb-16 md:pb-0">
+              {children}
+            </div>
+            <TabBar />
           </div>
-          <TabBar />
-        </div>
+        </TabBarProvider>
       </body>
     </html>
   );

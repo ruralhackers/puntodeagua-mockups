@@ -110,7 +110,11 @@ export default function Home() {
   // Función para formatear fecha con día de la semana
   const formatearFechaConDia = (fecha: string) => {
     const diaSemana = obtenerDiaSemana(fecha);
-    return `${fecha} (${diaSemana})`;
+    const fechaObj = new Date(fecha + 'T00:00:00');
+    const dia = fechaObj.getDate();
+    const mes = fechaObj.toLocaleString('es', { month: 'long' });
+    const año = fechaObj.getFullYear();
+    return `${diaSemana}, ${dia} de ${mes} de ${año}`;
   };
 
   // Función para categorizar fechas
@@ -164,7 +168,7 @@ export default function Home() {
         <div className="mb-6">
           <Button 
             size="lg" 
-            className="w-full" 
+            className="w-full bg-blue-600 hover:bg-blue-700" 
             onClick={() => router.push('/dashboard/nuevo-registro')}
           >
             Nuevo Registro
@@ -179,10 +183,10 @@ export default function Home() {
               <span className="text-sm text-gray-500">{elementosAtencion.length} elementos</span>
             </div>
             <div className="space-y-2">
-              {elementosAtencion.map((elemento) => (
+              {elementosAtencion.slice(0, 2).map((elemento) => (
                 <div 
                   key={`${elemento.tipo}-${elemento.id}`} 
-                  className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
+                  className={`p-3 ${elemento.tipo === 'incidencia' ? 'bg-orange-50' : 'bg-gray-50'} rounded-md hover:bg-gray-100 transition-colors`}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
@@ -192,15 +196,7 @@ export default function Home() {
                         }`}>
                           {elemento.tipo === 'incidencia' ? 'Incidencia' : 'Recordatorio Vencido'}
                         </span>
-                        {elemento.tipo === 'incidencia' && 'prioridad' in elemento && (
-                           <span className={`px-2 py-1 text-xs rounded-full ${
-                             elemento.prioridad === 'Alta' ? 'bg-red-200 text-red-900' :
-                             elemento.prioridad === 'Media' ? 'bg-yellow-100 text-yellow-800' :
-                             'bg-green-100 text-green-800'
-                           }`}>
-                             {elemento.prioridad}
-                           </span>
-                         )}
+                        {/* Eliminada la clasificación del nivel de incidencia */}
                       </div>
                       <h3 className="font-medium text-sm text-gray-900">{elemento.titulo}</h3>
                       <p className="text-xs text-gray-600 mt-1">
@@ -211,9 +207,9 @@ export default function Home() {
                        </p>
                     </div>
                   </div>
-                  <div className="flex justify-end">
+                  <div className="flex items-center justify-between">
                     <span 
-                      className="text-xs text-blue-600 cursor-pointer hover:text-blue-800"
+                      className="text-xs text-blue-600 cursor-pointer hover:text-blue-800 ml-auto"
                       onClick={() => {
                         if (elemento.tipo === 'incidencia') {
                           // Crear parámetros URL con los datos disponibles de la incidencia
@@ -241,6 +237,11 @@ export default function Home() {
                   </div>
                 </div>
               ))}
+              {elementosAtencion.length > 2 && (
+                <div className="text-center text-sm text-gray-500 mt-2">
+                  {elementosAtencion.length - 2} elementos más requieren atención
+                </div>
+              )}
             </div>
             <a href="/dashboard/atencion" className="block w-full mt-3 text-sm text-blue-600 hover:text-blue-800 font-medium text-center">
                Ver todos los elementos
@@ -310,15 +311,15 @@ export default function Home() {
                             >
                               <div>
                                 <div className="mb-3">
-                                  <h4 className="font-medium text-sm text-gray-900">{recordatorio.titulo}</h4>
-                                  <p className="text-xs text-gray-600 mt-1">
-                                    {recordatorio.periodicidad}
-                                  </p>
-                                  <div className="flex items-center gap-2 mt-2">
+                                  <div className="flex items-center gap-2 mb-2">
                                     <span className={`px-2 py-1 text-xs rounded-full font-medium ${getTipoColor(recordatorio.tipoRegistro)}`}>
                                       {getTipoLabel(recordatorio.tipoRegistro)}
                                     </span>
                                   </div>
+                                  <h4 className="font-medium text-sm text-gray-900">{recordatorio.titulo}</h4>
+                                  <p className="text-xs text-gray-600 mt-1">
+                                    {recordatorio.periodicidad}
+                                  </p>
                                 </div>
                                 <div className="text-right">
                                   <span className="text-blue-600 text-xs font-medium">

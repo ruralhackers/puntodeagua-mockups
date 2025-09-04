@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, ChangeEvent, FormEvent } from 'react';
+import { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,8 @@ import { ArrowLeft } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { FormHeader } from '@/components/ui/form-header';
+import { useTabBar } from '@/contexts/TabBarContext';
 
 interface FormData {
   fecha: string;
@@ -22,6 +24,8 @@ interface FormData {
 
 export default function TurbidezPage() {
   const router = useRouter();
+  const { hideTabBar, showTabBar } = useTabBar();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     fecha: new Date().toISOString().split('T')[0],
     persona: '',
@@ -64,26 +68,63 @@ export default function TurbidezPage() {
     }
   };
 
+  // Esconder TabBar al montar el componente
+  useEffect(() => {
+    hideTabBar();
+    return () => {
+      showTabBar();
+    };
+  }, [hideTabBar, showTabBar]);
+
+  // Validar campos obligatorios
+  const isFormValid = () => {
+    return (
+      formData.fecha !== '' &&
+      formData.persona.trim() !== '' &&
+      formData.resultadoTurbidez !== '' &&
+      formData.zona !== ''
+    );
+  };
+
+  const handleCancel = () => {
+    if (window.confirm('¿Estás seguro de que quieres cancelar? Los datos no guardados se perderán.')) {
+      router.back();
+    }
+  };
+
+  const handleSave = async () => {
+    if (!isFormValid()) return;
+    
+    setIsLoading(true);
+    try {
+      console.log('Datos enviados:', formData);
+      // Aquí iría la lógica para enviar los datos al servidor
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simular guardado
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Error al guardar:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Datos enviados:', formData);
-    // Aquí iría la lógica para enviar los datos al servidor
-    router.push('/dashboard');
+    handleSave();
   };
 
   return (
-    <div className="p-4 pb-20">
-      <div className="flex items-center gap-3 mb-6">
-        <button 
-          onClick={() => router.back()}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <h1 className="text-xl font-semibold">Registro de Turbidez</h1>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <FormHeader
+        tipoRegistro="Turbidez"
+        onCancel={handleCancel}
+        onSave={handleSave}
+        canSave={isFormValid()}
+        isLoading={isLoading}
+      />
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="px-4 py-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
         {/* Información Básica */}
         <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 space-y-4">
           <h2 className="text-lg font-semibold text-slate-800 border-b border-slate-300 pb-3 mb-4">📋 Información Básica</h2>
@@ -189,10 +230,8 @@ export default function TurbidezPage() {
           </div>
         </div>
 
-        <Button type="submit" className="w-full" size="lg">
-          Guardar Registro
-        </Button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

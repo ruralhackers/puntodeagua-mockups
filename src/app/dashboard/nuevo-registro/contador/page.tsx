@@ -7,9 +7,13 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, AlertTriangle, CheckCircle, Users, Calendar, Search } from 'lucide-react';
+import { FormHeader } from '@/components/ui/form-header';
+import { useTabBar } from '@/contexts/TabBarContext';
 
 export default function NuevoContadorPage() {
   const router = useRouter();
+  const { hideTabBar, showTabBar } = useTabBar();
+  const [isLoading, setIsLoading] = useState(false);
   const [zonaSeleccionada, setZonaSeleccionada] = useState('');
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState<any>(null);
   const [busquedaUsuario, setBusquedaUsuario] = useState('');
@@ -94,16 +98,57 @@ export default function NuevoContadorPage() {
     }));
   };
 
+  // Esconder TabBar al montar el componente
+  useEffect(() => {
+    hideTabBar();
+    return () => {
+      showTabBar();
+    };
+  }, [hideTabBar, showTabBar]);
+
+  // Validar campos obligatorios
+  const isFormValid = () => {
+    return (
+      usuarioSeleccionado &&
+      formData.lecturaActual !== '' &&
+      formData.fechaActual !== ''
+    );
+  };
+
+  const handleCancel = () => {
+    if (hayDatosSinGuardar()) {
+      if (window.confirm('¿Estás seguro de que quieres cancelar? Los datos no guardados se perderán.')) {
+        router.back();
+      }
+    } else {
+      router.back();
+    }
+  };
+
+  const handleSave = async () => {
+    if (!isFormValid()) return;
+    
+    setIsLoading(true);
+    try {
+      const validacion = validarConsumo();
+      console.log('Datos del contador:', {
+        zona: zonaSeleccionada,
+        usuario: usuarioSeleccionado,
+        formData,
+        validacion
+      });
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simular guardado
+      router.push('/dashboard/registros');
+    } catch (error) {
+      console.error('Error al guardar:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const validacion = validarConsumo();
-    console.log('Datos del contador:', {
-      zona: zonaSeleccionada,
-      usuario: usuarioSeleccionado,
-      formData,
-      validacion
-    });
-    router.push('/dashboard/registros');
+    handleSave();
   };
 
   const renderSeleccionUsuario = () => (
@@ -376,46 +421,47 @@ export default function NuevoContadorPage() {
             </div>
           </div>
 
-          {/* Botones */}
-          <div className="flex gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={manejarVolver}
-              className="flex-1"
-            >
-              Volver
-            </Button>
-            <Button
-              type="submit"
-              className="flex-1"
-            >
-              Guardar Lectura
-            </Button>
-          </div>
         </form>
       </div>
     );
   };
 
   return (
-    <div className="px-3 py-4 pb-20">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <button
-          onClick={() => router.back()}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Lectura de Contadores</h1>
-          <p className="text-gray-600">Registra la lectura del contador de agua</p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      {usuarioSeleccionado && (
+        <FormHeader
+          tipoRegistro="Lectura de Contador"
+          onCancel={handleCancel}
+          onSave={handleSave}
+          canSave={isFormValid()}
+          isLoading={isLoading}
+        />
+      )}
 
-      {/* Contenido */}
-      {!usuarioSeleccionado ? renderSeleccionUsuario() : renderFormulario()}
+      {!usuarioSeleccionado ? (
+        <div className="px-3 py-4 pb-20">
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-6">
+            <button
+              onClick={() => router.back()}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Lectura de Contadores</h1>
+              <p className="text-gray-600">Registra la lectura del contador de agua</p>
+            </div>
+          </div>
+
+          {/* Contenido */}
+          {renderSeleccionUsuario()}
+        </div>
+      ) : (
+        <div className="px-4 py-6">
+          {renderFormulario()}
+        </div>
+      )}
     </div>
   );
 }
