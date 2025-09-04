@@ -52,6 +52,7 @@ module.exports = {
           foreground: "var(--card-foreground)",
         },
         "registry-block": "#F8FAFC",
+        incident: "var(--color-card-incident)",
       },
       borderRadius: {
         lg: "var(--radius)",

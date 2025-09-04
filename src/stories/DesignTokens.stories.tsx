@@ -36,7 +36,7 @@ const ShadowBlock = ({ name, className }: ShadowBlockProps) => (
 const DesignTokens = () => {
   return (
     <div className="p-6 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">Tokens de Diseño</h1>
+      <h1 className="text-2xl font-bold mb-8">Tokens de Diseño</h1>
       
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-6">Espaciado</h2>

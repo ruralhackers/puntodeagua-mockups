@@ -121,7 +121,7 @@ export default function ContadorDetallePage() {
             </Button>
           </Link>
           <div className="min-w-0">
-            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight truncate">
+            <h1 className="text-2xl font-bold tracking-tight truncate">
               {displayData?.nombre} {displayData?.apellidos}
             </h1>
             <p className="text-muted-foreground text-sm lg:text-base">

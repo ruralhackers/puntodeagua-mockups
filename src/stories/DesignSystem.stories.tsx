@@ -52,7 +52,7 @@ const RadiusBlock = ({ name, value }: RadiusBlockProps) => (
 const DesignSystem = () => {
   return (
     <div className="p-6 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">Sistema de Diseño</h1>
+      <h1 className="text-2xl font-bold mb-8">Sistema de Diseño</h1>
       
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-6">Colores</h2>
@@ -114,7 +114,7 @@ const DesignSystem = () => {
           <TypographyBlock 
             variant="Heading 2" 
             sample="Sección Principal" 
-            className="text-3xl font-bold"
+            className="text-2xl font-bold"
           />
           <TypographyBlock 
             variant="Heading 3" 

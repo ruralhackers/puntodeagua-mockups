@@ -82,7 +82,7 @@ export default function UsuariosPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div className="flex-1 min-w-0">
-          <h1 className="text-3xl font-bold tracking-tight truncate">Gestión de Usuarios</h1>
+          <h1 className="text-2xl font-bold tracking-tight truncate">Gestión de Usuarios</h1>
           <p className="text-muted-foreground">
             Administra los usuarios del sistema y sus permisos
           </p>

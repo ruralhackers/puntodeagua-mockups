@@ -10,7 +10,7 @@ import { Textarea } from '../components/ui/textarea';
 const FormStates = () => {
   return (
     <div className="p-6 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">Estados de Componentes de Formulario</h1>
+      <h1 className="text-2xl font-bold mb-8">Estados de Componentes de Formulario</h1>
       
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-6">Inputs</h2>

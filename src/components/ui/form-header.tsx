@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { Button, CancelButton } from '@/components/ui/button';
 import { X, Check } from 'lucide-react';
 
 interface FormHeaderProps {
@@ -22,27 +22,21 @@ export function FormHeader({
     <div className="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3">
       <div className="flex items-center justify-between">
         {/* Botón Cancelar */}
-        <Button
-          variant="destructive"
-          size="sm"
+        <CancelButton
           onClick={onCancel}
-          className="px-3"
           disabled={isLoading}
         >
           Cancelar
-        </Button>
+        </CancelButton>
 
-        {/* Tipo de Registro */}
+        {/* Espacio central vacío */}
         <div className="text-center">
-          <h1 className="text-sm font-medium text-gray-900">
-            Nuevo {tipoRegistro}
-          </h1>
+          {/* El título se eliminó y se mostrará directamente en la página */}
         </div>
 
         {/* Botón Guardar */}
         <Button
           variant="default"
-          size="sm"
           onClick={onSave}
           disabled={!canSave || isLoading}
           className="px-3"

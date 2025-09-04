@@ -68,7 +68,7 @@ export default function ContadoresPage() {
       </div>
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div className="flex-1 min-w-0">
-          <h1 className="text-3xl font-bold tracking-tight truncate">Contadores</h1>
+          <h1 className="text-2xl font-bold tracking-tight truncate">Contadores</h1>
           <p className="text-muted-foreground">
             Gestiona los contadores y puntos de agua de la comunidad
           </p>

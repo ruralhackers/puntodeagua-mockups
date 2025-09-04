@@ -1,109 +1,60 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Button } from '../components/ui/button';
+import { Button, CancelButton } from '../components/ui/button';
 import { ArrowRight, Plus, Save } from 'lucide-react';
 
-const meta: Meta<typeof Button> = {
+const meta = {
   title: 'UI/Button',
-  component: Button,
   parameters: {
     layout: 'centered',
   },
   tags: ['autodocs'],
-  argTypes: {
-    variant: {
-      control: 'select',
-      options: ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link'],
-    },
-    size: {
-      control: 'select',
-      options: ['default', 'sm', 'lg', 'icon'],
-    },
-    asChild: {
-      control: 'boolean',
-    },
-  },
-};
+} as const;
 
 export default meta;
-type Story = StoryObj<typeof Button>;
 
-export const Default: Story = {
-  args: {
-    children: 'Button',
-    variant: 'default',
-    size: 'default',
-  },
+type ButtonStory = StoryObj<typeof Button>;
+type CancelButtonStory = StoryObj<typeof CancelButton>;
+
+export const Default: ButtonStory = {
+  render: () => <Button>Button</Button>,
 };
 
-export const Destructive: Story = {
-  args: {
-    children: 'Eliminar',
-    variant: 'destructive',
-    size: 'default',
-  },
+export const Destructive: ButtonStory = {
+  render: () => <Button variant="destructive">Eliminar</Button>,
 };
 
-export const Outline: Story = {
-  args: {
-    children: 'Cancelar',
-    variant: 'outline',
-    size: 'default',
-  },
+export const Outline: ButtonStory = {
+  render: () => <Button variant="outline">Aceptar</Button>,
 };
 
-export const Secondary: Story = {
-  args: {
-    children: 'Secundario',
-    variant: 'secondary',
-    size: 'default',
-  },
+export const Secondary: ButtonStory = {
+  render: () => <Button variant="secondary">Secundario</Button>,
 };
 
-export const Small: Story = {
-  args: {
-    children: 'Pequeño',
-    variant: 'default',
-    size: 'sm',
-  },
+export const WithIcon: ButtonStory = {
+  render: () => (
+    <Button>
+      Continuar <ArrowRight />
+    </Button>
+  ),
 };
 
-export const Large: Story = {
-  args: {
-    children: 'Grande',
-    variant: 'default',
-    size: 'lg',
-  },
+export const IconOnly: ButtonStory = {
+  render: () => (
+    <Button variant="icon" aria-label="Añadir">
+      <Plus />
+    </Button>
+  ),
 };
 
-export const WithIcon: Story = {
-  args: {
-    children: (
-      <>
-        Continuar <ArrowRight />
-      </>
-    ),
-    variant: 'default',
-    size: 'default',
-  },
+export const SaveButton: ButtonStory = {
+  render: () => (
+    <Button>
+      <Save /> Guardar
+    </Button>
+  ),
 };
 
-export const IconOnly: Story = {
-  args: {
-    children: <Plus />,
-    variant: 'default',
-    size: 'icon',
-    'aria-label': 'Añadir',
-  },
-};
-
-export const SaveButton: Story = {
-  args: {
-    children: (
-      <>
-        <Save /> Guardar
-      </>
-    ),
-    variant: 'default',
-    size: 'default',
-  },
+export const Cancel: CancelButtonStory = {
+  render: () => <CancelButton>Cancelar</CancelButton>,
 };

@@ -29,7 +29,7 @@ const TypographyExample = ({
 const DesignTypography = () => {
   return (
     <div className="p-6 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">Tipografía</h1>
+      <h1 className="text-2xl font-bold mb-8">Tipografía</h1>
       
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-6">Jerarquía de Encabezados</h2>
@@ -41,8 +41,8 @@ const DesignTypography = () => {
           />
           <TypographyExample 
             title="Heading 2" 
-            className="text-3xl font-bold tracking-tight" 
-            description="text-3xl font-bold tracking-tight"
+            className="text-2xl font-bold tracking-tight" 
+            description="text-2xl font-bold tracking-tight"
           />
           <TypographyExample 
             title="Heading 3" 

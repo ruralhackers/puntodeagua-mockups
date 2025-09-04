@@ -50,7 +50,7 @@
   
   /* Sistema de colores personalizado para la aplicación */
   --color-card-reminder: oklch(1.0000 0 0); /* Blanco para recordatorios */
-  --color-card-incident: oklch(0.9751 0.0127 244.2507); /* Naranja suave para incidencias */
+  --color-card-incident: oklch(0.85 0.15 60); /* Naranja más intenso para incidencias */
   --color-form-block-basic: oklch(1.0000 0 0); /* Blanco para info básica */
   --color-registry-block: oklch(1.0000 0 0); /* Blanco para bloques de registros */
   --color-button-primary: oklch(0.5362 0.2197 230.0338); /* Azul para botones primarios (como nuevo registro) */
