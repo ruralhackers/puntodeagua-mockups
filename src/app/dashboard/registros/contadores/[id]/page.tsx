@@ -5,9 +5,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, AlertTriangle, Edit2, Trash2, BarChart3, List } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, Edit2, Trash2, BarChart3, List, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   Select,
@@ -24,6 +25,7 @@ type Reading = {
   consumo: number;
   consumoAnomalo: boolean;
   unidadContador: 'm³' | 'L';
+  observaciones?: string;
 };
 
 type Counter = {
@@ -50,48 +52,50 @@ export default function CounterDetailPage({ params }: { params: { id: string } }
       {
         id: 1,
         fecha: '15/08/24',
-        lecturaContador: 1247.23,
-        consumo: 245,
+        lecturaContador: 1247.234,
+        consumo: 345124,
         consumoAnomalo: true,
-        unidadContador: 'm³'
+        unidadContador: 'm³',
+        observaciones: 'Contador difícil de acceder'
       },
       {
         id: 2,
         fecha: '12/05/24',
-        lecturaContador: 1002,
-        consumo: 198,
+        lecturaContador: 1002.110,
+        consumo: 198567,
         consumoAnomalo: false,
         unidadContador: 'm³'
       },
       {
         id: 3,
         fecha: '18/02/24',
-        lecturaContador: 804,
-        consumo: 167,
+        lecturaContador: 804.543,
+        consumo: 167890,
         consumoAnomalo: false,
         unidadContador: 'm³'
       },
       {
         id: 4,
         fecha: '15/11/23',
-        lecturaContador: 637,
-        consumo: 201,
+        lecturaContador: 637.653,
+        consumo: 201456,
         consumoAnomalo: false,
-        unidadContador: 'm³'
+        unidadContador: 'm³',
+        observaciones: 'Lectura estimada por acceso bloqueado'
       },
       {
         id: 5,
         fecha: '20/08/23',
-        lecturaContador: 436,
-        consumo: 189,
+        lecturaContador: 436.197,
+        consumo: 189234,
         consumoAnomalo: false,
         unidadContador: 'm³'
       },
       {
         id: 6,
         fecha: '15/05/23',
-        lecturaContador: 247,
-        consumo: 175,
+        lecturaContador: 247.963,
+        consumo: 175678,
         consumoAnomalo: false,
         unidadContador: 'm³'
       }
@@ -102,7 +106,9 @@ export default function CounterDetailPage({ params }: { params: { id: string } }
   const [selectedPeriod, setSelectedPeriod] = useState('ultimo6');
   const [editingReading, setEditingReading] = useState<Reading | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [editObservaciones, setEditObservaciones] = useState('');
   const [deleteReading, setDeleteReading] = useState<Reading | null>(null);
+  const [expandedReadings, setExpandedReadings] = useState<Set<number>>(new Set());
 
   // Get last reading (first in array as they're sorted by date desc)
   const ultimaLectura = contador.lecturas[0];
@@ -136,6 +142,13 @@ export default function CounterDetailPage({ params }: { params: { id: string } }
   // Mock threshold for daily consumption (L/day)
   const dailyThreshold = 180;
 
+  // Helper function to format numbers compactly
+  const formatCompactNumber = (num: number) => {
+    if (num >= 1000000) return Math.round(num / 1000000) + 'M';
+    if (num >= 1000) return Math.round(num / 1000) + 'k';
+    return num.toString();
+  };
+
   // Generate chart data for consumption columns
   const generateChartData = () => {
     return contador.lecturas.map((lectura, index) => {
@@ -150,6 +163,7 @@ export default function CounterDetailPage({ params }: { params: { id: string } }
         date: lectura.fecha,
         formattedDate,
         consumption: lectura.consumo,
+        compactConsumption: formatCompactNumber(lectura.consumo),
         dailyAverage: parseFloat(stats.dailyConsumption),
         days: stats.days,
         isAnomalous,
@@ -167,14 +181,16 @@ export default function CounterDetailPage({ params }: { params: { id: string } }
   const handleEditReading = (reading: Reading) => {
     setEditingReading(reading);
     setEditValue(reading.lecturaContador.toString());
+    setEditObservaciones(reading.observaciones || '');
   };
 
   const handleSaveEdit = () => {
     if (editingReading && editValue.trim()) {
       // Here you would update the reading in your data store
-      console.log(`Updating reading ${editingReading.id} to value ${editValue}`);
+      console.log(`Updating reading ${editingReading.id} to value ${editValue} with observations: ${editObservaciones}`);
       setEditingReading(null);
       setEditValue('');
+      setEditObservaciones('');
     }
   };
 
@@ -188,6 +204,16 @@ export default function CounterDetailPage({ params }: { params: { id: string } }
       console.log(`Deleting reading ${deleteReading.id}`);
       setDeleteReading(null);
     }
+  };
+
+  const toggleReadingExpansion = (readingId: number) => {
+    const newExpanded = new Set(expandedReadings);
+    if (newExpanded.has(readingId)) {
+      newExpanded.delete(readingId);
+    } else {
+      newExpanded.add(readingId);
+    }
+    setExpandedReadings(newExpanded);
   };
 
   return (
@@ -285,8 +311,8 @@ export default function CounterDetailPage({ params }: { params: { id: string } }
                 </div>
                 
                 {/* Value label */}
-                <div className="w-16 text-xs text-gray-900 font-medium">
-                  {data.consumption}L
+                <div className="w-12 text-xs text-gray-900 font-medium">
+                  {data.compactConsumption}
                 </div>
               </div>
             ))}
@@ -309,69 +335,98 @@ export default function CounterDetailPage({ params }: { params: { id: string } }
           </div>
         </div>
       ) : (
-        // History View with new card format
-        <div className="space-y-4">
+        // History View with ultra-clean card format
+        <div className="space-y-3">
           {contador.lecturas.map((lectura, index) => {
             const stats = calculateReadingStats(lectura, index);
-            const isDailyConsumptionHigh = parseFloat(stats.dailyConsumption) > (dailyThreshold / stats.days);
+            
+            // Format date in Spanish
+            const [day, month, year] = lectura.fecha.split('/');
+            const fullYear = parseInt(year) < 50 ? 2000 + parseInt(year) : 1900 + parseInt(year);
+            const date = new Date(fullYear, parseInt(month) - 1, parseInt(day));
+            const formattedDate = date.toLocaleDateString('es-ES', {
+              day: 'numeric',
+              month: 'long', 
+              year: 'numeric'
+            });
+
+            // Check if reading has observations
+            const hasObservations = lectura.observaciones && lectura.observaciones.trim() !== '';
+            
+            const isExpanded = expandedReadings.has(lectura.id);
             
             return (
               <div key={lectura.id} className="bg-white border border-gray-200 rounded-lg p-4">
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-lg font-bold ${
-                      lectura.consumoAnomalo ? 'text-red-600' : 'text-gray-900'
-                    }`}>
-                      {lectura.consumo}L
-                    </span>
-                    {lectura.consumoAnomalo && (
-                      <span className="text-red-600 font-bold">(!)</span>
-                    )}
-                  </div>
-                  
-                  <div className="text-sm text-gray-600">
-                    {stats.dailyConsumption} L/día • {stats.days} días
-                  </div>
-                  
-                  <div className="text-xs text-gray-500">
-                    Umbral: {dailyThreshold} L/día
-                  </div>
-                  
-                  <div className="text-sm text-gray-900">
-                    {(() => {
-                      const [day, month, year] = lectura.fecha.split('/');
-                      const fullYear = parseInt(year) < 50 ? 2000 + parseInt(year) : 1900 + parseInt(year);
-                      const date = new Date(fullYear, parseInt(month) - 1, parseInt(day));
-                      return date.toLocaleDateString('es-ES', {
-                        day: 'numeric',
-                        month: 'long', 
-                        year: 'numeric'
-                      });
-                    })()}
-                  </div>
-                  
-                  <div className="text-sm text-gray-500">
-                    Lectura: {lectura.lecturaContador.toFixed(2)} {contador.unidadContador}
-                  </div>
-                  
-                  <div className="flex justify-end gap-2 mt-3">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEditReading(lectura)}
-                      className="p-2"
+                  {/* Main: Consumption + Alert */}
+                  <div className="flex items-center justify-between">
+                    <div className="text-lg font-semibold">
+                      <span className={lectura.consumoAnomalo ? 'text-red-600' : 'text-gray-900'}>
+                        {lectura.consumo.toLocaleString('es-ES')} L
+                      </span>
+                      {lectura.consumoAnomalo && <span className="text-red-600 ml-2">⚠</span>}
+                    </div>
+                    <button
+                      onClick={() => toggleReadingExpansion(lectura.id)}
+                      className="p-1 hover:bg-gray-100 rounded transition-colors"
                     >
-                      <Edit2 className="h-4 w-4 text-gray-500" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteReading(lectura)}
-                      className="p-2"
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
+                      {isExpanded ? (
+                        <ChevronUp className="h-4 w-4 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-gray-500" />
+                      )}
+                    </button>
                   </div>
+                  
+                  {/* Date */}
+                  <div className="text-gray-600 text-sm pl-2">
+                    {formattedDate}
+                  </div>
+                  
+                  {/* Observations (if any) - Always visible */}
+                  {hasObservations && (
+                    <div className="text-gray-600 text-sm pl-2">
+                      💬 "{lectura.observaciones}"
+                    </div>
+                  )}
+                  
+                  {/* Collapsible Details */}
+                  {isExpanded && (
+                    <div className="space-y-1 pl-2 pt-2 border-t border-gray-100">
+                      {/* Period */}
+                      <div className="text-gray-600 text-sm">
+                        Periodo: {stats.days} días
+                      </div>
+                      
+                      {/* Reading */}
+                      <div className="text-gray-600 text-sm">
+                        Lectura: {lectura.lecturaContador.toLocaleString('es-ES', { 
+                          minimumFractionDigits: 1, 
+                          maximumFractionDigits: 1 
+                        })} {contador.unidadContador}
+                      </div>
+                      
+                      {/* Action buttons */}
+                      <div className="flex justify-end gap-2 pt-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditReading(lectura)}
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1 h-auto text-sm"
+                        >
+                          Editar
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteReading(lectura)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-1 h-auto text-sm"
+                        >
+                          Eliminar
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -389,19 +444,40 @@ export default function CounterDetailPage({ params }: { params: { id: string } }
           {editingReading && (
             <div className="space-y-4">
               <div>
-                <p className="text-sm text-gray-600 mb-2">
+                <p className="text-sm text-gray-600 mb-4">
                   Fecha: {editingReading.fecha}
                 </p>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Lectura del contador ({contador.unidadContador})
-                </label>
-                <Input
-                  type="number"
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  placeholder="Ingresa la nueva lectura"
-                  className="w-full"
-                />
+                
+                <div className="space-y-4">
+                  {/* Reading field */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Lectura del contador ({contador.unidadContador}) *
+                    </label>
+                    <Input
+                      type="number"
+                      step="0.001"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      placeholder="Ingresa la nueva lectura"
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  {/* Observations field */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Observaciones (opcional)
+                    </label>
+                    <Textarea
+                      value={editObservaciones}
+                      onChange={(e) => setEditObservaciones(e.target.value)}
+                      placeholder="Anota cualquier observación sobre esta lectura..."
+                      rows={3}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
               </div>
               
               <div className="flex gap-3">
