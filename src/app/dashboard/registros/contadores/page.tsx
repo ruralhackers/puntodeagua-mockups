@@ -152,9 +152,9 @@ export default function ContadoresPage() {
     const date = new Date(parseInt(fullYear), parseInt(month) - 1, parseInt(day));
     
     const options: Intl.DateTimeFormatOptions = { 
-      weekday: 'long', 
       day: 'numeric', 
-      month: 'long' 
+      month: 'long',
+      year: 'numeric'
     };
     return date.toLocaleDateString('es-ES', options);
   };
@@ -321,14 +321,17 @@ export default function ContadoresPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-semibold text-gray-900">
-                      {contador.nombre} {contador.apellidos} ({contador.ultimoConsumo} L)
+                      {contador.nombre} {contador.apellidos}
                     </h3>
                     {contador.consumoAnomalo && (
                       <AlertTriangle className="h-5 w-5 text-red-600" />
                     )}
                   </div>
-                  <p className="text-sm text-gray-600">
-                    {formatNaturalDate(contador.fechaUltimaLectura)} • {contador.zona}
+                  <p className="text-sm text-gray-600 mb-1">
+                    {formatNaturalDate(contador.fechaUltimaLectura)} • {contador.ultimoConsumo} L
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {contador.zona}
                   </p>
                 </div>
                 <div className="flex items-center">

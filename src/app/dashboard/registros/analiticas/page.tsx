@@ -256,9 +256,9 @@ export default function AnaliticasPage() {
   const formatNaturalDate = (dateString: string) => {
     const date = new Date(dateString);
     const options: Intl.DateTimeFormatOptions = { 
-      weekday: 'long', 
       day: 'numeric', 
-      month: 'long' 
+      month: 'long',
+      year: 'numeric'
     };
     return date.toLocaleDateString('es-ES', options);
   };
@@ -368,8 +368,11 @@ export default function AnaliticasPage() {
                     <AlertTriangle className="h-5 w-5 text-red-600" />
                   )}
                 </div>
-                <p className="text-sm text-gray-600">
-                  {formatNaturalDate(analitic.fecha)} • {analitic.zona}
+                <p className="text-sm text-gray-600 mb-1">
+                  {formatNaturalDate(analitic.fecha)}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {analitic.zona}
                 </p>
               </div>
               

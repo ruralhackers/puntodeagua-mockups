@@ -5,10 +5,17 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, AlertTriangle, Edit2, Trash2 } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, Edit2, Trash2, BarChart3, List } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Reading = {
   id: number;
@@ -43,7 +50,7 @@ export default function CounterDetailPage({ params }: { params: { id: string } }
       {
         id: 1,
         fecha: '15/08/24',
-        lecturaContador: 1247,
+        lecturaContador: 1247.23,
         consumo: 245,
         consumoAnomalo: true,
         unidadContador: 'm³'
@@ -91,12 +98,71 @@ export default function CounterDetailPage({ params }: { params: { id: string } }
     ]
   };
 
+  const [currentView, setCurrentView] = useState<'analytics' | 'history'>('analytics');
+  const [selectedPeriod, setSelectedPeriod] = useState('ultimo6');
   const [editingReading, setEditingReading] = useState<Reading | null>(null);
   const [editValue, setEditValue] = useState('');
   const [deleteReading, setDeleteReading] = useState<Reading | null>(null);
 
   // Get last reading (first in array as they're sorted by date desc)
   const ultimaLectura = contador.lecturas[0];
+
+  // Calculate days between readings and daily consumption
+  const calculateReadingStats = (currentReading: Reading, index: number) => {
+    if (index === contador.lecturas.length - 1) {
+      // Last reading, assume 96 days period as fallback
+      return { days: 96, dailyConsumption: (currentReading.consumo / 96).toFixed(1) };
+    }
+    
+    const nextReading = contador.lecturas[index + 1];
+    // Parse DD/MM/YY format properly
+    const [day, month, year] = currentReading.fecha.split('/');
+    const [nextDay, nextMonth, nextYear] = nextReading.fecha.split('/');
+    
+    // Handle 2-digit years (assume 20xx for years < 50, 19xx for years >= 50)
+    const fullYear = parseInt(year) < 50 ? 2000 + parseInt(year) : 1900 + parseInt(year);
+    const nextFullYear = parseInt(nextYear) < 50 ? 2000 + parseInt(nextYear) : 1900 + parseInt(nextYear);
+    
+    const currentDate = new Date(fullYear, parseInt(month) - 1, parseInt(day));
+    const nextDate = new Date(nextFullYear, parseInt(nextMonth) - 1, parseInt(nextDay));
+    
+    const diffTime = Math.abs(currentDate.getTime() - nextDate.getTime());
+    const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const dailyConsumption = days > 0 ? (currentReading.consumo / days).toFixed(1) : '0.0';
+    
+    return { days, dailyConsumption };
+  };
+
+  // Mock threshold for daily consumption (L/day)
+  const dailyThreshold = 180;
+
+  // Generate chart data for consumption columns
+  const generateChartData = () => {
+    return contador.lecturas.map((lectura, index) => {
+      const stats = calculateReadingStats(lectura, index);
+      const isAnomalous = lectura.consumoAnomalo;
+      
+      // Parse date and format as MM/YY
+      const [day, month, year] = lectura.fecha.split('/');
+      const formattedDate = `${month}/${year}`;
+      
+      return {
+        date: lectura.fecha,
+        formattedDate,
+        consumption: lectura.consumo,
+        dailyAverage: parseFloat(stats.dailyConsumption),
+        days: stats.days,
+        isAnomalous,
+        // Calculate column width relative to max consumption  
+        columnWidth: Math.min((lectura.consumo / Math.max(...contador.lecturas.map(l => l.consumo))) * 100, 100)
+      };
+    }); // No reverse - show most recent first (desc order)
+  };
+
+  const chartData = generateChartData();
+  const maxConsumption = Math.max(...contador.lecturas.map(l => l.consumo));
+  const normalityLine = (180 / maxConsumption) * 100; // 180L fixed threshold line
+
 
   const handleEditReading = (reading: Reading) => {
     setEditingReading(reading);
@@ -141,88 +207,177 @@ export default function CounterDetailPage({ params }: { params: { id: string } }
         </h1>
       </div>
 
-      {/* Main Info Card - Option B */}
+
+      {/* Filters */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">💧</span>
-            <div>
-              <span className="font-medium text-gray-900">
-                Último: {ultimaLectura.consumo} L • {ultimaLectura.fecha}
-              </span>
-              {ultimaLectura.consumoAnomalo && (
-                <AlertTriangle className="inline-block ml-2 h-4 w-4 text-red-500" />
-              )}
+        <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+          <SelectTrigger className="text-base">
+            <SelectValue placeholder="📅 Período" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ultimo6">📅 Últimos 6 meses</SelectItem>
+            <SelectItem value="year2025">📅 Año 2025</SelectItem>
+            <SelectItem value="year2024">📅 Año 2024</SelectItem>
+            <SelectItem value="year2023">📅 Año 2023</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* View Toggle */}
+      <div className="flex border-b border-gray-200 mb-6">
+        <button
+          onClick={() => setCurrentView('analytics')}
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            currentView === 'analytics'
+              ? 'border-blue-500 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <BarChart3 className="h-4 w-4" />
+          Resumen
+        </button>
+        <button
+          onClick={() => setCurrentView('history')}
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            currentView === 'history'
+              ? 'border-blue-500 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <List className="h-4 w-4" />
+          Historial
+        </button>
+      </div>
+
+      {/* Content based on current view */}
+      {currentView === 'analytics' ? (
+        // Analytics View - Simple bar chart
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Consumo por periodo</h3>
+          </div>
+          
+          <div className="space-y-3">
+            {/* Chart rows (columns displayed vertically) */}
+            {chartData.map((data, index) => (
+              <div key={index} className="flex items-center gap-3">
+                {/* Date label */}
+                <div className="w-12 text-xs text-gray-600 font-medium text-right">
+                  {data.formattedDate}
+                </div>
+                
+                {/* Column bar */}
+                <div className="flex-1 relative h-8 bg-gray-100 rounded">
+                  {/* Normality line */}
+                  <div 
+                    className="absolute h-full border-l-2 border-dashed border-orange-400 opacity-60"
+                    style={{left: `${normalityLine}%`}}
+                  ></div>
+                  
+                  {/* Consumption bar */}
+                  <div
+                    className={`h-full rounded transition-all hover:opacity-80 cursor-pointer ${
+                      data.isAnomalous ? 'bg-red-500' : 'bg-blue-500'
+                    }`}
+                    style={{width: `${data.columnWidth}%`}}
+                    title={`${data.date}: ${data.consumption}L (${data.dailyAverage} L/día)`}
+                  ></div>
+                </div>
+                
+                {/* Value label */}
+                <div className="w-16 text-xs text-gray-900 font-medium">
+                  {data.consumption}L
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Legend */}
+          <div className="flex items-center justify-center gap-6 text-xs text-gray-600 mt-4">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-blue-500 rounded"></div>
+              <span>Normal</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-red-500 rounded"></div>
+              <span>Anómalo</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-0.5 border-t-2 border-dashed border-orange-400"></div>
+              <span>Umbral</span>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-1 text-sm text-gray-600">
-          <span>📍</span>
-          <span>{contador.zona}</span>
-        </div>
-      </div>
-
-      {/* Historical Readings */}
-      <div className="bg-white border border-gray-200 rounded-lg">
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="font-semibold text-gray-900">Historial de Lecturas</h2>
-          <p className="text-sm text-gray-600 mt-1">
-            Contador en {contador.unidadContador}, consumos en L
-          </p>
-        </div>
-        
-        <div className="divide-y divide-gray-200">
-          {contador.lecturas.map((lectura) => (
-            <div key={lectura.id} className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm font-medium text-gray-900 w-16">
-                      {lectura.fecha}
+      ) : (
+        // History View with new card format
+        <div className="space-y-4">
+          {contador.lecturas.map((lectura, index) => {
+            const stats = calculateReadingStats(lectura, index);
+            const isDailyConsumptionHigh = parseFloat(stats.dailyConsumption) > (dailyThreshold / stats.days);
+            
+            return (
+              <div key={lectura.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-lg font-bold ${
+                      lectura.consumoAnomalo ? 'text-red-600' : 'text-gray-900'
+                    }`}>
+                      {lectura.consumo}L
                     </span>
-                    <span className="text-sm text-gray-600 w-20">
-                      {lectura.lecturaContador} {contador.unidadContador}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-900">
-                        {lectura.consumo} L
-                      </span>
-                      {lectura.consumoAnomalo && (
-                        <AlertTriangle className="h-4 w-4 text-red-500" />
-                      )}
-                    </div>
+                    {lectura.consumoAnomalo && (
+                      <span className="text-red-600 font-bold">(!)</span>
+                    )}
+                  </div>
+                  
+                  <div className="text-sm text-gray-600">
+                    {stats.dailyConsumption} L/día • {stats.days} días
+                  </div>
+                  
+                  <div className="text-xs text-gray-500">
+                    Umbral: {dailyThreshold} L/día
+                  </div>
+                  
+                  <div className="text-sm text-gray-900">
+                    {(() => {
+                      const [day, month, year] = lectura.fecha.split('/');
+                      const fullYear = parseInt(year) < 50 ? 2000 + parseInt(year) : 1900 + parseInt(year);
+                      const date = new Date(fullYear, parseInt(month) - 1, parseInt(day));
+                      return date.toLocaleDateString('es-ES', {
+                        day: 'numeric',
+                        month: 'long', 
+                        year: 'numeric'
+                      });
+                    })()}
+                  </div>
+                  
+                  <div className="text-sm text-gray-500">
+                    Lectura: {lectura.lecturaContador.toFixed(2)} {contador.unidadContador}
+                  </div>
+                  
+                  <div className="flex justify-end gap-2 mt-3">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEditReading(lectura)}
+                      className="p-2"
+                    >
+                      <Edit2 className="h-4 w-4 text-gray-500" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteReading(lectura)}
+                      className="p-2"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEditReading(lectura)}
-                    className="p-2"
-                  >
-                    <Edit2 className="h-4 w-4 text-gray-500" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteReading(lectura)}
-                    className="p-2"
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
-                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
-
-        <div className="p-4 text-center border-t border-gray-200">
-          <Button variant="outline" size="sm">
-            Ver todo el historial
-          </Button>
-        </div>
-      </div>
+      )}
 
       {/* Edit Reading Modal */}
       <Dialog open={editingReading !== null} onOpenChange={() => setEditingReading(null)}>
