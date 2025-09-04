@@ -186,7 +186,7 @@ export default function Home() {
               {elementosAtencion.slice(0, 2).map((elemento) => (
                 <div 
                   key={`${elemento.tipo}-${elemento.id}`} 
-                  className={`p-3 ${elemento.tipo === 'incidencia' ? 'bg-orange-50' : 'bg-gray-50'} rounded-md hover:bg-gray-100 transition-colors`}
+                  className="p-3 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors shadow-sm"
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
@@ -297,7 +297,7 @@ export default function Home() {
                           return (
                             <button
                               key={recordatorio.id}
-                              className="w-full p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors text-left"
+                              className="w-full p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left shadow-sm"
                               onClick={() => {
                                 // Redirigir a la página de nuevo registro del tipo correspondiente
                                 if (recordatorio.tipoRegistro === 'contador') {

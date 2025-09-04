@@ -38,6 +38,8 @@ export default function AtencionPage() {
   ];
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showDeleteTaskDialog, setShowDeleteTaskDialog] = useState(false);
+  const [tareaAEliminar, setTareaAEliminar] = useState<number | null>(null);
   const [tareasPasadas, setTareasPasadas] = useState([
     {
       id: 1,
@@ -72,7 +74,16 @@ export default function AtencionPage() {
   ];
   
   const eliminarTarea = (id: number) => {
-    setTareasPasadas(tareasPasadas.filter(tarea => tarea.id !== id));
+    setTareaAEliminar(id);
+    setShowDeleteTaskDialog(true);
+  };
+  
+  const confirmarEliminarTarea = () => {
+    if (tareaAEliminar !== null) {
+      setTareasPasadas(tareasPasadas.filter(tarea => tarea.id !== tareaAEliminar));
+      setShowDeleteTaskDialog(false);
+      setTareaAEliminar(null);
+    }
   };
   
   const limpiarTodasLasTareas = () => {
@@ -118,7 +129,7 @@ export default function AtencionPage() {
         {todosElementos.map((elemento) => (
           <div 
             key={`${elemento.tipo}-${elemento.id}`} 
-            className={`p-3 ${elemento.tipo === 'incidencia' ? 'bg-orange-50' : 'bg-gray-50'} rounded-md hover:bg-gray-100 transition-colors cursor-pointer`}
+            className="p-3 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors cursor-pointer shadow-sm"
             onClick={() => handleElementClick(elemento)}
           >
             <div className="flex items-start justify-between mb-2">
@@ -186,6 +197,23 @@ export default function AtencionPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>Cancelar</Button>
             <Button variant="destructive" onClick={limpiarTodasLasTareas}>Eliminar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de confirmación para eliminar tarea individual */}
+      <Dialog open={showDeleteTaskDialog} onOpenChange={setShowDeleteTaskDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar eliminación</DialogTitle>
+          </DialogHeader>
+          <div className="py-3">
+            ¿Estás seguro de que deseas eliminar este recordatorio?
+            Esta acción no se puede deshacer.
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteTaskDialog(false)}>Cancelar</Button>
+            <Button variant="destructive" onClick={confirmarEliminarTarea}>Eliminar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
