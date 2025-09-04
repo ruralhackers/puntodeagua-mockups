@@ -10,17 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { BackButton } from '@/components/ui/back-button';
+import { CounterCard, type CounterData } from '@/components/ui/counter-card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-type Counter = {
-  id: number;
-  nombre: string;
-  apellidos: string;
-  zona: string;
-  ultimaLectura: number;
-  ultimoConsumo: number;
-  fechaUltimaLectura: string;
-  consumoAnomalo: boolean;
-};
+// Using CounterData interface from the component
 
 export default function ContadoresPage() {
   const router = useRouter();
@@ -31,15 +24,15 @@ export default function ContadoresPage() {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
   // Mock data - replace with real data later
-  const contadores: Counter[] = [
+  const contadores: CounterData[] = [
     {
       id: 1,
       nombre: 'María',
       apellidos: 'González López',
       zona: 'Depósito/Centro',
-      ultimaLectura: 1247,
-      ultimoConsumo: 245,
-      fechaUltimaLectura: '15/08/24',
+      lecturaAnterior: 1.247, // Converted to m³
+      ultimoConsumo: 245.0,
+      ultimaLectura: '15/08/24',
       consumoAnomalo: false
     },
     {
@@ -47,9 +40,9 @@ export default function ContadoresPage() {
       nombre: 'José',
       apellidos: 'Martín Rodríguez',
       zona: 'Depósito/Centro',
-      ultimaLectura: 2892,
-      ultimoConsumo: 856,
-      fechaUltimaLectura: '12/08/24',
+      lecturaAnterior: 2.892, // Converted to m³
+      ultimoConsumo: 856.0,
+      ultimaLectura: '12/08/24',
       consumoAnomalo: true
     },
     {
@@ -57,9 +50,9 @@ export default function ContadoresPage() {
       nombre: 'Ana',
       apellidos: 'Fernández Silva',
       zona: 'O Casas',
-      ultimaLectura: 892,
-      ultimoConsumo: 156,
-      fechaUltimaLectura: '10/05/24',
+      lecturaAnterior: 0.892, // Converted to m³
+      ultimoConsumo: 156.0,
+      ultimaLectura: '10/05/24',
       consumoAnomalo: false
     },
     {
@@ -67,9 +60,9 @@ export default function ContadoresPage() {
       nombre: 'Pedro',
       apellidos: 'López García',
       zona: 'O Casas',
-      ultimaLectura: 1156,
-      ultimoConsumo: 198,
-      fechaUltimaLectura: '14/08/24',
+      lecturaAnterior: 1.156, // Converted to m³
+      ultimoConsumo: 198.0,
+      ultimaLectura: '14/08/24',
       consumoAnomalo: false
     },
     {
@@ -77,9 +70,9 @@ export default function ContadoresPage() {
       nombre: 'Carmen',
       apellidos: 'Díaz Martín',
       zona: 'Ramis',
-      ultimaLectura: 3421,
-      ultimoConsumo: 312,
-      fechaUltimaLectura: '13/08/24',
+      lecturaAnterior: 3.421, // Converted to m³
+      ultimoConsumo: 312.0,
+      ultimaLectura: '13/08/24',
       consumoAnomalo: false
     },
     {
@@ -87,9 +80,9 @@ export default function ContadoresPage() {
       nombre: 'Francisco',
       apellidos: 'Vázquez Ramos',
       zona: 'Ramis',
-      ultimaLectura: 2156,
-      ultimoConsumo: 445,
-      fechaUltimaLectura: '11/08/24',
+      lecturaAnterior: 2.156, // Converted to m³
+      ultimoConsumo: 445.0,
+      ultimaLectura: '11/08/24',
       consumoAnomalo: true
     },
     {
@@ -97,9 +90,9 @@ export default function ContadoresPage() {
       nombre: 'Laura',
       apellidos: 'Sánchez Torres',
       zona: 'Depósito/Centro',
-      ultimaLectura: 1834,
-      ultimoConsumo: 167,
-      fechaUltimaLectura: '16/08/24',
+      lecturaAnterior: 1.834, // Converted to m³
+      ultimoConsumo: 167.0,
+      ultimaLectura: '16/08/24',
       consumoAnomalo: false
     }
   ];
@@ -109,7 +102,7 @@ export default function ContadoresPage() {
   // Filter counters based on search, zone, and status
   const filteredContadores = contadores.filter(contador => {
     const matchesSearch = searchTerm === '' || 
-      `${contador.nombre} ${contador.apellidos}`.toLowerCase().includes(searchTerm.toLowerCase());
+      `${contador.nombre} ${contador.apellidos || ''}`.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesZone = selectedZone === 'todas' || contador.zona === selectedZone;
     
@@ -144,19 +137,9 @@ export default function ContadoresPage() {
     }
   };
 
-  // Helper function to format date naturally
-  const formatNaturalDate = (dateString: string) => {
-    // Convert from DD/MM/YY format to full date
-    const [day, month, year] = dateString.split('/');
-    const fullYear = year.length === 2 ? '20' + year : year;
-    const date = new Date(parseInt(fullYear), parseInt(month) - 1, parseInt(day));
-    
-    const options: Intl.DateTimeFormatOptions = { 
-      day: 'numeric', 
-      month: 'long',
-      year: 'numeric'
-    };
-    return date.toLocaleDateString('es-ES', options);
+  // Handle counter click
+  const handleCounterClick = (counter: CounterData) => {
+    router.push(`/dashboard/registros/contadores/${counter.id}`);
   };
 
   return (
@@ -223,32 +206,19 @@ export default function ContadoresPage() {
               {/* Zone Filter */}
               <div>
                 <h3 className="font-medium text-gray-900 mb-3">ZONA</h3>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-3">
-                    <input
-                      type="radio"
-                      name="zona"
-                      value="todas"
-                      checked={selectedZone === 'todas'}
-                      onChange={(e) => setSelectedZone(e.target.value)}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-sm">Todas las zonas</span>
-                  </label>
-                  {zonas.map((zona) => (
-                    <label key={zona} className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="zona"
-                        value={zona}
-                        checked={selectedZone === zona}
-                        onChange={(e) => setSelectedZone(e.target.value)}
-                        className="w-4 h-4"
-                      />
-                      <span className="text-sm">{zona}</span>
-                    </label>
-                  ))}
-                </div>
+                <Select value={selectedZone} onValueChange={setSelectedZone}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecciona una zona" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todas">Todas las zonas</SelectItem>
+                    {zonas.map((zona) => (
+                      <SelectItem key={zona} value={zona}>
+                        {zona}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Status Filter */}
@@ -312,35 +282,13 @@ export default function ContadoresPage() {
           </div>
         ) : (
           filteredContadores.map((contador) => (
-            <div
+            <CounterCard
               key={contador.id}
-              className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors"
-              onClick={() => router.push(`/dashboard/registros/contadores/${contador.id}`)}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-gray-900">
-                      {contador.nombre} {contador.apellidos}
-                    </h3>
-                    {contador.consumoAnomalo && (
-                      <AlertTriangle className="h-5 w-5 text-red-600" />
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-600 mb-1">
-                    {formatNaturalDate(contador.fechaUltimaLectura)} • {contador.ultimoConsumo} L
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {contador.zona}
-                  </p>
-                </div>
-                <div className="flex items-center">
-                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </div>
-            </div>
+              counter={contador}
+              onClick={handleCounterClick}
+              showConsumption={true}
+              dateFormat="natural"
+            />
           ))
         )}
       </div>
