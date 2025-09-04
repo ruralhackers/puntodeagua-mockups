@@ -106,7 +106,31 @@ export default function NuevoContadorPage() {
 
   // Validar si el formulario es válido
   const isFormValid = () => {
-    return validateForm();
+    // Validar sin actualizar el estado para evitar bucles infinitos
+    const newErrors: FormErrors = {};
+
+    if (!formData.nombre.trim()) newErrors.nombre = 'El nombre es obligatorio';
+    if (!formData.apellidos.trim()) newErrors.apellidos = 'Los apellidos son obligatorios';
+    if (!formData.dni.trim()) newErrors.dni = 'El DNI es obligatorio';
+    if (!formData.refCatastral.trim()) newErrors.refCatastral = 'La referencia catastral es obligatoria';
+
+    // Validación del DNI (formato básico)
+    const dniRegex = /^[0-9]{8}[TRWAGMYFPDXBNJZSQVHLCKE]$/i;
+    if (formData.dni && !dniRegex.test(formData.dni)) {
+      newErrors.dni = 'Formato de DNI inválido';
+    }
+
+    // Validación de coordenadas GPS (formato básico) - solo si se proporciona
+    const coordRegex = /^-?\d+\.\d+,\s*-?\d+\.\d+$/;
+    if (formData.coordenadasGPS.trim() && !coordRegex.test(formData.coordenadasGPS)) {
+      newErrors.coordenadasGPS = 'Formato de coordenadas inválido (ej: 40.4168, -3.7038)';
+    }
+
+    if (!formData.unidadMedida) {
+      newErrors.unidadMedida = 'La unidad de medida es obligatoria';
+    }
+
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleCancel = () => {

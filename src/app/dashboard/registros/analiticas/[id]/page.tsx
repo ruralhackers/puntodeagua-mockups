@@ -4,6 +4,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Edit, Trash2, FileText, Image, Download, Plus, MoreVertical, Check, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -62,6 +63,8 @@ interface Props {
 }
 
 export default function AnaliticaDetailPage({ params }: Props) {
+  // Unwrap params using React.use()
+  const unwrappedParams = use(params);
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -139,7 +142,14 @@ export default function AnaliticaDetailPage({ params }: Props) {
     return mockData.find(item => item.id === parseInt(id)) || null;
   };
 
-  const analitica = getAnaliticaById(params.id);
+  const [analitica, setAnalitica] = useState<Analytic | null>(null);
+  
+  // Fetch analitica data when component mounts
+  useEffect(() => {
+    const id = unwrappedParams.id;
+    const data = getAnaliticaById(id);
+    setAnalitica(data);
+  }, [unwrappedParams.id]);
 
   // Initialize editable states when analitica loads
   useEffect(() => {
@@ -202,7 +212,7 @@ export default function AnaliticaDetailPage({ params }: Props) {
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     // In a real app, make API call to delete
-    console.log('Deleting analítica:', params.id);
+    console.log('Deleting analítica:', unwrappedParams.id);
     
     // Navigate back to list
     router.push('/dashboard/registros/analiticas');
