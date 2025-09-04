@@ -315,138 +315,102 @@ export default function NuevoContadorPage() {
 
   const renderFormulario = () => {
     const validacion = validarConsumo();
+    const diasTranscurridos = Math.ceil((new Date(formData.fechaActual).getTime() - new Date(usuarioSeleccionado?.ultimaLectura || '').getTime()) / (1000 * 60 * 60 * 24));
+    const consumoPorDia = validacion.diferencia > 0 && diasTranscurridos > 0 ? (validacion.diferenciaLitros / diasTranscurridos) : 0;
     
     return (
-      <div className="space-y-6">
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Información Básica */}
+      <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Nueva Lectura */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-300 pb-3 mb-4">📋 Información Básica</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Nueva Lectura</h3>
+            <div className="space-y-3">
               <div>
-                <Label>Zona</Label>
-                <Input value={usuarioSeleccionado?.zona} disabled className="bg-gray-50" />
+                <Label htmlFor="lecturaActual" className="text-base font-medium">Lectura *</Label>
+                <div className="relative">
+                  <Input
+                    id="lecturaActual"
+                    name="lecturaActual"
+                    type="number"
+                    step="0.001"
+                    value={formData.lecturaActual}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="0.000"
+                    className="text-xl font-bold h-12 pr-12"
+                  />
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">m³</span>
+                </div>
               </div>
               <div>
-                <Label>Personas Registradas</Label>
-                <Input value={usuarioSeleccionado?.personasRegistradas} disabled className="bg-gray-50" />
+                <Label htmlFor="fechaActual" className="text-base font-medium">Fecha *</Label>
+                <Input
+                  id="fechaActual"
+                  name="fechaActual"
+                  type="date"
+                  value={formData.fechaActual}
+                  onChange={handleInputChange}
+                  required
+                  className="h-11"
+                />
               </div>
             </div>
           </div>
 
-          {/* Lecturas */}
+          {/* Lectura Anterior */}
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-300 pb-3 mb-4">📊 Lecturas</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Lectura Anterior */}
-                <div className="border border-gray-200 rounded-lg p-4 shadow-sm">
-                  <Label className="font-medium">Lectura Anterior</Label>
-                  <div className="mt-2">
-                    <div className="text-2xl font-bold">{usuarioSeleccionado?.lecturaAnterior} m³</div>
-                    <div className="text-sm text-muted-foreground">Fecha: {usuarioSeleccionado?.ultimaLectura}</div>
-                  </div>
-                </div>
-
-                {/* Lectura Actual */}
-                <div className="border border-gray-200 rounded-lg p-4 shadow-sm">
-                  <Label htmlFor="lecturaActual" className="font-medium">Lectura Actual *</Label>
-                  <div className="mt-2 space-y-2">
-                    <Input
-                      id="lecturaActual"
-                      name="lecturaActual"
-                      type="number"
-                      step="0.001"
-                      value={formData.lecturaActual}
-                      onChange={handleInputChange}
-                      required
-                      placeholder="0.000"
-                      className="text-lg font-semibold"
-                    />
-                    <div className="mt-2">
-                      <Label htmlFor="fechaActual" className="font-medium text-sm">Fecha de Lectura *</Label>
-                      <Input
-                        id="fechaActual"
-                        name="fechaActual"
-                        type="date"
-                        value={formData.fechaActual}
-                        onChange={handleInputChange}
-                        required
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Diferencia */}
-                <div className="border border-gray-200 rounded-lg p-4 shadow-sm">
-                  <Label className="font-medium">Consumo</Label>
-                  <div className="mt-2">
-                    <div className="text-2xl font-bold">
-                      {formData.lecturaActual ? convertirALitros(calcularDiferencia()).toFixed(0) : '0'} L
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      ({formData.lecturaActual ? calcularDiferencia().toFixed(3) : '0.000'} m³)
-                    </div>
-                  </div>
-                </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Lectura Anterior</h3>
+            <div className="space-y-2">
+              <div className="text-xl font-bold text-gray-900">
+                {usuarioSeleccionado?.lecturaAnterior} m³
+              </div>
+              <div className="text-gray-600">
+                {usuarioSeleccionado?.ultimaLectura ? 
+                  new Date(usuarioSeleccionado.ultimaLectura).toLocaleDateString('es-ES', { 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                  }) : ''
+                }
               </div>
             </div>
+          </div>
 
-          {/* Validación de Consumo */}
+          {/* Consumo Calculado */}
           {formData.lecturaActual && (
-            <div className={`border rounded-lg p-6 ${validacion.excedido ? 'border-red-200 bg-white' : 'border-green-200 bg-white'}`}>
-              <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-200">
-                {validacion.excedido ? (
-                  <AlertTriangle className="h-6 w-6 text-red-600" />
-                ) : (
-                  <CheckCircle className="h-6 w-6 text-green-600" />
-                )}
-                <h3 className={`text-lg font-semibold ${validacion.excedido ? 'text-red-800' : 'text-green-800'}`}>
-                  {validacion.excedido ? '⚠️ Consumo Elevado' : '✅ Consumo Normal'}
-                </h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                <div>
-                  <span className={validacion.excedido ? 'text-red-700' : 'text-green-700'}>Consumo actual:</span>
-                  <div className="font-bold text-lg">{validacion.diferenciaLitros.toFixed(0)} L</div>
+            <div className={`border rounded-lg p-6 ${validacion.excedido ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Consumo Calculado</h3>
+              <div className="space-y-2">
+                <div className="text-2xl font-bold text-gray-900">
+                  {validacion.diferenciaLitros.toLocaleString('es-ES', { 
+                    minimumFractionDigits: 1, 
+                    maximumFractionDigits: 1 
+                  })} L
                 </div>
-                <div>
-                  <span className={validacion.excedido ? 'text-red-700' : 'text-green-700'}>Umbral permitido:</span>
-                  <div className="font-bold text-lg">{validacion.umbral.toFixed(0)} L</div>
+                <div className="text-gray-600">
+                  {consumoPorDia.toLocaleString('es-ES', { 
+                    minimumFractionDigits: 0, 
+                    maximumFractionDigits: 0 
+                  })} L/día • {diasTranscurridos} días
                 </div>
-                <div>
-                  <span className={validacion.excedido ? 'text-red-700' : 'text-green-700'}>Porcentaje:</span>
-                  <div className="font-bold text-lg">{validacion.porcentaje.toFixed(1)}%</div>
+                <div className={`font-medium ${validacion.excedido ? 'text-red-700' : 'text-green-700'}`}>
+                  {validacion.excedido ? '⚠ Consumo elevado' : '✓ Consumo normal'}
                 </div>
               </div>
-              
-              {validacion.excedido && (
-                <div className="mt-4 p-3 bg-red-100 rounded-lg">
-                  <p className="text-red-800 text-sm">
-                    <strong>Advertencia:</strong> El consumo supera el umbral de 180L/día/persona. 
-                    Revisa posibles fugas o consumo anómalo.
-                  </p>
-                </div>
-              )}
             </div>
           )}
 
           {/* Observaciones */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-300 pb-3 mb-4">📝 Observaciones</h3>
-            <div>
-              <Label htmlFor="observaciones">Observaciones (opcional)</Label>
-              <Textarea
-                id="observaciones"
-                name="observaciones"
-                value={formData.observaciones}
-                onChange={handleInputChange}
-                rows={3}
-                placeholder="Anota cualquier observación sobre el contador, acceso, o anomalías detectadas"
-                className="mt-1"
-              />
-            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Observaciones (opcional)</h3>
+            <Textarea
+              id="observaciones"
+              name="observaciones"
+              value={formData.observaciones}
+              onChange={handleInputChange}
+              rows={3}
+              placeholder="Anota cualquier observación sobre el contador, acceso, o anomalías detectadas"
+            />
           </div>
 
         </form>
@@ -487,6 +451,12 @@ export default function NuevoContadorPage() {
         </div>
       ) : (
         <div className="px-4 py-6 bg-background">
+          {/* Header con información del usuario */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">{usuarioSeleccionado?.nombre}</h1>
+            <p className="text-gray-600">{usuarioSeleccionado?.zona}</p>
+          </div>
+          
           {renderFormulario()}
         </div>
       )}
