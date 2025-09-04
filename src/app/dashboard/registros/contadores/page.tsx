@@ -28,6 +28,7 @@ export default function ContadoresPage() {
   const [selectedZone, setSelectedZone] = useState('todas');
   const [selectedStatus, setSelectedStatus] = useState('todos');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
   // Mock data - replace with real data later
   const contadores: Counter[] = [
@@ -130,6 +131,34 @@ export default function ContadoresPage() {
     setSelectedStatus('todos');
   };
 
+  // Toggle search expansion
+  const toggleSearch = () => {
+    if (isSearchExpanded && searchTerm) {
+      // Don't collapse if there's search content
+      return;
+    }
+    setIsSearchExpanded(!isSearchExpanded);
+    if (!isSearchExpanded) {
+      // Clear search when collapsing
+      setSearchTerm('');
+    }
+  };
+
+  // Helper function to format date naturally
+  const formatNaturalDate = (dateString: string) => {
+    // Convert from DD/MM/YY format to full date
+    const [day, month, year] = dateString.split('/');
+    const fullYear = year.length === 2 ? '20' + year : year;
+    const date = new Date(parseInt(fullYear), parseInt(month) - 1, parseInt(day));
+    
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: 'long', 
+      day: 'numeric', 
+      month: 'long' 
+    };
+    return date.toLocaleDateString('es-ES', options);
+  };
+
   return (
     <div className="px-3 py-4 pb-20">
       <div className="mb-4">
@@ -137,23 +166,42 @@ export default function ContadoresPage() {
       </div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Contadores</h1>
-        <p className="text-gray-600">Gestión de contadores y control de consumos</p>
+        <p className="text-gray-600">Control de consumos</p>
       </div>
 
-      {/* Search */}
-      <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-        <Input
-          type="text"
-          placeholder="Buscar por nombre..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
-      </div>
+      {/* Search and Filters - Compact */}
+      <div className="flex gap-3 mb-4">
+        {isSearchExpanded ? (
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              type="text"
+              placeholder="Buscar por nombre..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-10"
+              autoFocus
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleSearch}
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleSearch}
+            className="flex items-center gap-2"
+          >
+            <Search className="h-4 w-4" />
+          </Button>
+        )}
 
-      {/* Filter Button */}
-      <div className="flex justify-end mb-4">
         <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm" className="flex items-center gap-2">
@@ -272,20 +320,15 @@ export default function ContadoresPage() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-medium text-gray-900">
-                      {contador.nombre} {contador.apellidos}
+                    <h3 className="font-semibold text-gray-900">
+                      {contador.nombre} {contador.apellidos} ({contador.ultimoConsumo} L)
                     </h3>
                     {contador.consumoAnomalo && (
-                      <div className="flex items-center gap-1 text-red-600">
-                        <AlertTriangle className="h-4 w-4" />
-                      </div>
+                      <AlertTriangle className="h-5 w-5 text-red-600" />
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 mb-1">
-                    {contador.ultimoConsumo} L • {contador.fechaUltimaLectura}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {contador.zona}
+                  <p className="text-sm text-gray-600">
+                    {formatNaturalDate(contador.fechaUltimaLectura)} • {contador.zona}
                   </p>
                 </div>
                 <div className="flex items-center">

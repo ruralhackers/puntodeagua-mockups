@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AlertTriangle, BarChart3, List } from 'lucide-react';
+import { AlertTriangle, BarChart3, List, Filter } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { BackButton } from '@/components/ui/back-button';
 
 type Analytic = {
   id: number;
@@ -251,6 +252,17 @@ export default function AnaliticasPage() {
 
   const activityData = generateGitHubActivityData();
 
+  // Helper function to format date naturally
+  const formatNaturalDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: 'long', 
+      day: 'numeric', 
+      month: 'long' 
+    };
+    return date.toLocaleDateString('es-ES', options);
+  };
+
   const renderSummaryView = () => (
     <div className="space-y-6">
       {/* GitHub-style Activity Timeline */}
@@ -349,34 +361,16 @@ export default function AnaliticasPage() {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-medium text-gray-900">
-                    {analitic.tipo} • {analitic.fecha}
+                  <h3 className="font-semibold text-gray-900">
+                    {analitic.tipo}
                   </h3>
-                  {analitic.problematica && (
-                    <div className="flex items-center gap-1 text-red-600">
-                      <AlertTriangle className="h-4 w-4" />
-                    </div>
+                  {!analitic.apta && (
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
                   )}
                 </div>
-                <p className="text-sm text-gray-600 mb-1">
-                  {analitic.zona} • {analitic.realizadoPor}
+                <p className="text-sm text-gray-600">
+                  {formatNaturalDate(analitic.fecha)} • {analitic.zona}
                 </p>
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    analitic.apta 
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {analitic.apta ? 'Correcta' : 'Anómala'}
-                  </span>
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    analitic.tipoRealizador === 'interno'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-purple-100 text-purple-800'
-                  }`}>
-                    {analitic.tipoRealizador === 'interno' ? 'Interno' : 'Externo'}
-                  </span>
-                </div>
               </div>
               
               <div className="flex items-center">
@@ -393,6 +387,9 @@ export default function AnaliticasPage() {
 
   return (
     <div className="px-3 py-4 pb-20">
+      <div className="mb-4">
+        <BackButton href="/dashboard/registros" />
+      </div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Analíticas</h1>
         <p className="text-gray-600">Análisis de calidad del agua</p>
@@ -419,7 +416,8 @@ export default function AnaliticasPage() {
           <Dialog open={isMoreFiltersOpen} onOpenChange={setIsMoreFiltersOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" className="flex items-center gap-2 px-4">
-                + Más filtros
+                <Filter className="h-4 w-4" />
+                Filtrar
                 {activeFiltersCount > 0 && (
                   <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] h-5 flex items-center justify-center">
                     {activeFiltersCount}
