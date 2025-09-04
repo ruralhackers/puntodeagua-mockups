@@ -20,8 +20,8 @@ export default function RegistrosPage() {
       count: 100
     },
     {
-      id: 'analisis',
-      titulo: 'Análisis',
+      id: 'analiticas',
+      titulo: 'Analíticas',
       descripcion: 'Registros de análisis de calidad del agua y parámetros',
       icono: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
