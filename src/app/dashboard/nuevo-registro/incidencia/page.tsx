@@ -128,7 +128,7 @@ export default function NuevaIncidenciaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <FormHeader
         tipoRegistro="Incidencia"
         onCancel={manejarVolver}
@@ -141,12 +141,12 @@ export default function NuevaIncidenciaPage() {
         {/* Formulario */}
         <form onSubmit={handleSubmit} className="space-y-6">
         {/* Información Básica y Descripción */}
-        <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 space-y-4">
-          <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-300 pb-3 mb-4">📋 Información Básica</h3>
+        <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-300 pb-3 mb-4">📋 Información Básica</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="zona" className="text-slate-700 font-medium">Zona *</Label>
+              <Label htmlFor="zona" className="text-gray-700 font-medium">Zona *</Label>
               <Select value={formData.zona} onValueChange={(value) => handleSelectChange('zona', value)}>
                 <SelectTrigger className="w-full mt-1">
                   <SelectValue placeholder="Selecciona la zona" />
@@ -160,7 +160,7 @@ export default function NuevaIncidenciaPage() {
             </div>
 
             <div>
-              <Label htmlFor="personaFirma" className="text-slate-700 font-medium">Persona que Firma *</Label>
+              <Label htmlFor="personaFirma" className="text-gray-700 font-medium">Persona que Firma *</Label>
               <Input
                 id="personaFirma"
                 name="personaFirma"
@@ -175,8 +175,8 @@ export default function NuevaIncidenciaPage() {
           </div>
 
           {/* Descripción dentro de Información Básica */}
-          <div className="mt-6 pt-4 border-t border-slate-300">
-            <Label htmlFor="descripcion" className="text-slate-700 font-medium">Descripción de la Incidencia *</Label>
+          <div className="mt-6 pt-4 border-t border-gray-300">
+            <Label htmlFor="descripcion" className="text-gray-700 font-medium">Descripción de la Incidencia *</Label>
             <textarea
               id="descripcion"
               name="descripcion"
@@ -185,24 +185,24 @@ export default function NuevaIncidenciaPage() {
               required
               rows={5}
               placeholder="Describe detalladamente la incidencia, incluyendo ubicación específica, síntomas observados, posibles causas y cualquier información relevante..."
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 mt-2 resize-vertical"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 mt-2 resize-vertical"
             />
-            <p className="text-xs text-slate-600 mt-1">
+            <p className="text-xs text-gray-600 mt-1">
               Proporciona todos los detalles posibles para facilitar la resolución
             </p>
           </div>
         </div>
 
         {/* Estado y Fechas */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-4">
-          <h3 className="text-lg font-semibold text-blue-800 border-b border-blue-300 pb-3 mb-4">📅 Estado y Fechas</h3>
+        <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-300 pb-3 mb-4">📅 Estado y Fechas</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Estado */}
-            <div className="bg-white rounded-lg p-4 border border-blue-200">
+            <div>
               <Label className="text-blue-700 font-medium">Estado *</Label>
               <Select value={formData.estado} onValueChange={(value) => handleSelectChange('estado', value)}>
-                <SelectTrigger className="w-full mt-2">
+                <SelectTrigger className="w-full mt-2 border-blue-200">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -223,7 +223,7 @@ export default function NuevaIncidenciaPage() {
             </div>
 
             {/* Fecha de Apertura */}
-            <div className="bg-white rounded-lg p-4 border border-blue-200">
+            <div>
               <Label htmlFor="fechaApertura" className="text-blue-700 font-medium">Fecha de Apertura *</Label>
               <Input
                 id="fechaApertura"
@@ -232,12 +232,12 @@ export default function NuevaIncidenciaPage() {
                 value={formData.fechaApertura}
                 onChange={handleInputChange}
                 required
-                className="mt-2"
+                className="mt-2 border-blue-200"
               />
             </div>
 
             {/* Fecha de Resolución */}
-            <div className="bg-white rounded-lg p-4 border border-blue-200">
+            <div>
               <Label htmlFor="fechaResolucion" className="text-blue-700 font-medium">
                 Fecha de Resolución {formData.estado === 'cerrada' ? '*' : ''}
               </Label>
@@ -249,7 +249,7 @@ export default function NuevaIncidenciaPage() {
                 onChange={handleInputChange}
                 required={formData.estado === 'cerrada'}
                 disabled={formData.estado === 'abierta'}
-                className={`mt-2 ${formData.estado === 'abierta' ? 'bg-gray-100' : ''}`}
+                className={`mt-2 border-blue-200 ${formData.estado === 'abierta' ? 'bg-gray-100' : ''}`}
               />
               {formData.estado === 'abierta' && (
                 <p className="text-xs text-gray-500 mt-1">
@@ -262,8 +262,8 @@ export default function NuevaIncidenciaPage() {
           {/* Indicador visual del estado */}
           <div className={`p-4 rounded-lg border-2 ${
             formData.estado === 'abierta' 
-              ? 'bg-red-50 border-red-200' 
-              : 'bg-green-50 border-green-200'
+              ? 'bg-white border-red-200' 
+              : 'bg-white border-green-200'
           }`}>
             <div className="flex items-center gap-3">
               {formData.estado === 'abierta' ? (
@@ -294,8 +294,8 @@ export default function NuevaIncidenciaPage() {
 
         {/* Resumen de la Incidencia */}
         {(formData.descripcion || formData.zona || formData.personaFirma) && (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">📋 Resumen de la Incidencia</h3>
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">📋 Resumen de la Incidencia</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="font-medium text-gray-700">Zona:</span>

@@ -264,7 +264,7 @@ export default function EditarIncidenciaPage() {
           </button>
           <button
             type="submit"
-            className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
+            className="flex-1 py-3 px-4 bg-button-primary text-white rounded-lg font-medium hover:opacity-90"
           >
             Guardar Cambios
           </button>

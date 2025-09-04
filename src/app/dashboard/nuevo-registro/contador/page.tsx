@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, AlertTriangle, CheckCircle, Users, Calendar, Search } from 'lucide-react';
 import { FormHeader } from '@/components/ui/form-header';
 import { useTabBar } from '@/contexts/TabBarContext';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function NuevoContadorPage() {
   const router = useRouter();
@@ -210,24 +212,17 @@ export default function NuevoContadorPage() {
                   <button
                     key={usuario.id}
                     onClick={() => setUsuarioSeleccionado(usuario)}
-                    className="w-full p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+                    className="w-full p-4 bg-white border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left shadow-sm"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
+                        <div className="mb-2">
                           <h3 className="font-semibold text-gray-900">{usuario.nombre}</h3>
-                          <span className="text-sm bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
-                            {usuario.apodo}
-                          </span>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-gray-600">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
                             <span>Última lectura: {usuario.ultimaLectura}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Users className="h-4 w-4" />
-                            <span>{usuario.personasRegistradas} personas</span>
                           </div>
                         </div>
                       </div>
@@ -281,9 +276,8 @@ export default function NuevoContadorPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Información Básica */}
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-300 pb-3 mb-4">📋 Información Básica</h3>
-            
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-300 pb-3 mb-4">📋 Información Básica</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Zona</Label>
@@ -297,86 +291,76 @@ export default function NuevoContadorPage() {
           </div>
 
           {/* Lecturas */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-blue-800 border-b border-blue-300 pb-3 mb-4">📊 Lecturas</h3>
-            
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-300 pb-3 mb-4">📊 Lecturas</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Lectura Anterior */}
-              <div className="bg-white rounded-lg p-4 border border-blue-200">
-                <Label className="text-blue-700 font-medium">Lectura Anterior</Label>
-                <div className="mt-2">
-                  <div className="text-2xl font-bold text-blue-900">{usuarioSeleccionado?.lecturaAnterior} m³</div>
-                  <div className="text-sm text-blue-600">Fecha: {usuarioSeleccionado?.ultimaLectura}</div>
-                </div>
-              </div>
-
-              {/* Lectura Actual */}
-              <div className="bg-white rounded-lg p-4 border border-blue-200">
-                <Label htmlFor="lecturaActual" className="text-blue-700 font-medium">Lectura Actual *</Label>
-                <div className="mt-2 space-y-2">
-                  <Input
-                    id="lecturaActual"
-                    name="lecturaActual"
-                    type="number"
-                    step="0.001"
-                    value={formData.lecturaActual}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="0.000"
-                    className="text-lg font-semibold"
-                  />
+                {/* Lectura Anterior */}
+                <div className="border border-gray-200 rounded-lg p-4 shadow-sm">
+                  <Label className="font-medium">Lectura Anterior</Label>
                   <div className="mt-2">
-                    <Label htmlFor="fechaActual" className="text-blue-700 font-medium text-sm">Fecha de Lectura *</Label>
+                    <div className="text-2xl font-bold">{usuarioSeleccionado?.lecturaAnterior} m³</div>
+                    <div className="text-sm text-muted-foreground">Fecha: {usuarioSeleccionado?.ultimaLectura}</div>
+                  </div>
+                </div>
+
+                {/* Lectura Actual */}
+                <div className="border border-gray-200 rounded-lg p-4 shadow-sm">
+                  <Label htmlFor="lecturaActual" className="font-medium">Lectura Actual *</Label>
+                  <div className="mt-2 space-y-2">
                     <Input
-                      id="fechaActual"
-                      name="fechaActual"
-                      type="date"
-                      value={formData.fechaActual}
+                      id="lecturaActual"
+                      name="lecturaActual"
+                      type="number"
+                      step="0.001"
+                      value={formData.lecturaActual}
                       onChange={handleInputChange}
                       required
-                      className="mt-1"
+                      placeholder="0.000"
+                      className="text-lg font-semibold"
                     />
+                    <div className="mt-2">
+                      <Label htmlFor="fechaActual" className="font-medium text-sm">Fecha de Lectura *</Label>
+                      <Input
+                        id="fechaActual"
+                        name="fechaActual"
+                        type="date"
+                        value={formData.fechaActual}
+                        onChange={handleInputChange}
+                        required
+                        className="mt-1"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Diferencia */}
-              <div className="bg-white rounded-lg p-4 border border-blue-200">
-                <Label className="text-blue-700 font-medium">Consumo</Label>
-                <div className="mt-2">
-                  <div className="text-2xl font-bold text-blue-900">
-                    {formData.lecturaActual ? convertirALitros(calcularDiferencia()).toFixed(0) : '0'} L
-                  </div>
-                  <div className="text-sm text-blue-600">
-                    ({formData.lecturaActual ? calcularDiferencia().toFixed(3) : '0.000'} m³)
+                {/* Diferencia */}
+                <div className="border border-gray-200 rounded-lg p-4 shadow-sm">
+                  <Label className="font-medium">Consumo</Label>
+                  <div className="mt-2">
+                    <div className="text-2xl font-bold">
+                      {formData.lecturaActual ? convertirALitros(calcularDiferencia()).toFixed(0) : '0'} L
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      ({formData.lecturaActual ? calcularDiferencia().toFixed(3) : '0.000'} m³)
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-
-          </div>
-
           {/* Validación de Consumo */}
           {formData.lecturaActual && (
-            <div className={`rounded-lg p-6 border-2 ${
-              validacion.excedido 
-                ? 'bg-red-50 border-red-200' 
-                : 'bg-green-50 border-green-200'
-            }`}>
-              <div className="flex items-center gap-3 mb-4">
+            <div className={`border rounded-lg p-6 ${validacion.excedido ? 'border-red-200 bg-white' : 'border-green-200 bg-white'}`}>
+              <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-200">
                 {validacion.excedido ? (
                   <AlertTriangle className="h-6 w-6 text-red-600" />
                 ) : (
                   <CheckCircle className="h-6 w-6 text-green-600" />
                 )}
-                <h3 className={`text-lg font-semibold ${
-                  validacion.excedido ? 'text-red-800' : 'text-green-800'
-                }`}>
+                <h3 className={`text-lg font-semibold ${validacion.excedido ? 'text-red-800' : 'text-green-800'}`}>
                   {validacion.excedido ? '⚠️ Consumo Elevado' : '✅ Consumo Normal'}
                 </h3>
               </div>
-              
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div>
                   <span className={validacion.excedido ? 'text-red-700' : 'text-green-700'}>Consumo actual:</span>
@@ -404,19 +388,18 @@ export default function NuevoContadorPage() {
           )}
 
           {/* Observaciones */}
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-amber-800 border-b border-amber-300 pb-3 mb-4">📝 Observaciones</h3>
-            
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-300 pb-3 mb-4">📝 Observaciones</h3>
             <div>
-              <Label htmlFor="observaciones">Observaciones adicionales</Label>
-              <textarea
+              <Label htmlFor="observaciones">Observaciones (opcional)</Label>
+              <Textarea
                 id="observaciones"
                 name="observaciones"
                 value={formData.observaciones}
                 onChange={handleInputChange}
                 rows={3}
                 placeholder="Anota cualquier observación sobre el contador, acceso, o anomalías detectadas"
-                className="w-full px-3 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 mt-1"
+                className="mt-1"
               />
             </div>
           </div>
@@ -427,7 +410,7 @@ export default function NuevoContadorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {usuarioSeleccionado && (
         <FormHeader
           tipoRegistro="Lectura de Contador"
@@ -439,12 +422,12 @@ export default function NuevoContadorPage() {
       )}
 
       {!usuarioSeleccionado ? (
-        <div className="px-3 py-4 pb-20">
+        <div className="px-4 py-6 bg-background">
           {/* Header */}
-          <div className="flex items-center gap-4 mb-6">
+          <div className="mb-6">
             <button
               onClick={() => router.back()}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors mb-2"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -458,7 +441,7 @@ export default function NuevoContadorPage() {
           {renderSeleccionUsuario()}
         </div>
       ) : (
-        <div className="px-4 py-6">
+        <div className="px-4 py-6 bg-background">
           {renderFormulario()}
         </div>
       )}

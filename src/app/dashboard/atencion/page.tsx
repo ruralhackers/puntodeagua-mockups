@@ -129,7 +129,7 @@ export default function AtencionPage() {
         {todosElementos.map((elemento) => (
           <div 
             key={`${elemento.tipo}-${elemento.id}`} 
-            className="p-3 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors cursor-pointer shadow-sm"
+            className={`p-3 ${elemento.tipo === 'incidencia' ? 'bg-orange-50' : 'bg-white'} border border-gray-200 rounded-md hover:bg-gray-50 transition-colors cursor-pointer shadow-sm`}
             onClick={() => handleElementClick(elemento)}
           >
             <div className="flex items-start justify-between mb-2">

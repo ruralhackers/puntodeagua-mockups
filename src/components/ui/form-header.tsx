@@ -23,10 +23,10 @@ export function FormHeader({
       <div className="flex items-center justify-between">
         {/* Botón Cancelar */}
         <Button
-          variant="ghost"
+          variant="destructive"
           size="sm"
           onClick={onCancel}
-          className="text-red-600 hover:text-red-800 px-3"
+          className="px-3"
           disabled={isLoading}
         >
           Cancelar
@@ -41,6 +41,7 @@ export function FormHeader({
 
         {/* Botón Guardar */}
         <Button
+          variant="default"
           size="sm"
           onClick={onSave}
           disabled={!canSave || isLoading}

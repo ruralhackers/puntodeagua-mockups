@@ -147,10 +147,14 @@ export default function Home() {
 
   return (
     <div className="flex flex-col">
-      <header className="sticky top-0 z-40 border-b bg-background">
+      <header className="border-b bg-background">
         <div className="flex h-14 items-center justify-between px-3">
-          <Link href="/" className="font-bold text-lg">
-            Gestión Aguas
+          <Link href="/" className="font-bold text-lg flex items-center gap-2 group">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-droplets h-7 w-7 group-hover:scale-110 transition-transform duration-300">
+              <path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"></path>
+              <path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"></path>
+            </svg>
+            Gestión de aguas de Anceu
           </Link>
           <div className="flex items-center gap-2 md:block hidden">
             <Button variant="outline" size="sm" asChild>
@@ -168,7 +172,7 @@ export default function Home() {
         <div className="mb-6">
           <Button 
             size="lg" 
-            className="w-full bg-blue-600 hover:bg-blue-700" 
+            className="w-full bg-button-primary hover:opacity-90" 
             onClick={() => router.push('/dashboard/nuevo-registro')}
           >
             Nuevo Registro
@@ -186,7 +190,7 @@ export default function Home() {
               {elementosAtencion.slice(0, 2).map((elemento) => (
                 <div 
                   key={`${elemento.tipo}-${elemento.id}`} 
-                  className="p-3 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors shadow-sm"
+                  className={`p-3 ${elemento.tipo === 'incidencia' ? 'bg-orange-50' : 'bg-white'} border border-gray-200 rounded-md hover:bg-gray-50 transition-colors shadow-sm`}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">

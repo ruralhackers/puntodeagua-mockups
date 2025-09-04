@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FormHeader } from '@/components/ui/form-header';
 import { useTabBar } from '@/contexts/TabBarContext';
 
@@ -100,7 +101,7 @@ export default function NuevoMantenimientoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <FormHeader
         tipoRegistro="Mantenimiento"
         onCancel={handleCancel}
@@ -113,25 +114,27 @@ export default function NuevoMantenimientoPage() {
       <div className="px-4 py-6">
         <form onSubmit={handleSubmit} className="space-y-6">
         {/* Información Básica */}
-        <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-slate-800 border-b border-slate-300 pb-3 mb-4">📋 Información Básica</h2>
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-300 pb-3 mb-4">📋 Información Básica</h3>
           
           <div className="grid grid-cols-1 gap-6">
             <div>
-              <Label htmlFor="objetoMantenimiento">Objeto del Mantenimiento *</Label>
-              <select
-                id="objetoMantenimiento"
-                name="objetoMantenimiento"
+              <Label htmlFor="objeto">Objeto del Mantenimiento *</Label>
+              <Select
                 value={formData.objetoMantenimiento}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                onValueChange={(value) => handleInputChange({
+                  target: { name: 'objetoMantenimiento', value }
+                } as React.ChangeEvent<HTMLSelectElement>)}
               >
-                <option value="">Selecciona el objeto del mantenimiento</option>
-                {objetosMantenimiento.map((objeto) => (
-                  <option key={objeto} value={objeto}>{objeto}</option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecciona el objeto del mantenimiento" />
+                </SelectTrigger>
+                <SelectContent>
+                  {objetosMantenimiento.map((objeto) => (
+                    <SelectItem key={objeto} value={objeto}>{objeto}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {formData.objetoMantenimiento === 'Otros' && (
@@ -174,19 +177,21 @@ export default function NuevoMantenimientoPage() {
 
             <div>
               <Label htmlFor="zona">Zona del Mantenimiento *</Label>
-              <select
-                id="zona"
-                name="zona"
+              <Select
                 value={formData.zona}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                onValueChange={(value) => handleInputChange({
+                  target: { name: 'zona', value }
+                } as React.ChangeEvent<HTMLSelectElement>)}
               >
-                <option value="">Selecciona la zona</option>
-                {zonas.map((zona) => (
-                  <option key={zona} value={zona}>{zona}</option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecciona la zona" />
+                </SelectTrigger>
+                <SelectContent>
+                  {zonas.map((zona) => (
+                    <SelectItem key={zona} value={zona}>{zona}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -203,8 +208,8 @@ export default function NuevoMantenimientoPage() {
         </div>
 
         {/* Descripción/Notas */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-blue-800 border-b border-blue-300 pb-3 mb-4">📝 Descripción/Notas</h2>
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-300 pb-3 mb-4">📝 Descripción/Notas</h3>
           
           <div>
             <Label htmlFor="descripcionNotas">Descripción del mantenimiento *</Label>
@@ -221,8 +226,8 @@ export default function NuevoMantenimientoPage() {
         </div>
 
         {/* Documentación */}
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-amber-800 border-b border-amber-300 pb-3 mb-4">📎 Documentación</h2>
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-300 pb-3 mb-4">📎 Documentación</h3>
           
           <div>
             <Label htmlFor="archivo">Subir archivo (fotos, videos, PDFs)</Label>
@@ -233,7 +238,7 @@ export default function NuevoMantenimientoPage() {
               onChange={handleFileChange}
               accept=".jpg,.jpeg,.png,.pdf,.mp4,.mov"
             />
-            <p className="text-sm text-amber-600 mt-1">
+            <p className="text-sm text-gray-600 mt-1">
               Formatos permitidos: JPG, PNG, PDF, MP4, MOV
             </p>
           </div>

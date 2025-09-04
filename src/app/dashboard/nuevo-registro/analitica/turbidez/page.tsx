@@ -114,7 +114,7 @@ export default function TurbidezPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <FormHeader
         tipoRegistro="Turbidez"
         onCancel={handleCancel}
@@ -174,8 +174,8 @@ export default function TurbidezPage() {
         </div>
 
         {/* Parámetros */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-blue-800 border-b border-blue-300 pb-3 mb-4">📊 Parámetros</h2>
+        <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-300 pb-3 mb-4">📊 Parámetros</h2>
           <div className="grid grid-cols-1 gap-6">
             <div>
               <Label htmlFor="resultadoTurbidez">Resultado de Turbidez (NTU)</Label>
@@ -204,8 +204,8 @@ export default function TurbidezPage() {
         </div>
 
         {/* Observaciones */}
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-amber-800 border-b border-amber-300 pb-3 mb-4">📝 Observaciones</h2>
+        <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-300 pb-3 mb-4">📝 Observaciones</h2>
           <div className="grid grid-cols-1 gap-6">
             <div>
               <Label htmlFor="notas">Notas</Label>

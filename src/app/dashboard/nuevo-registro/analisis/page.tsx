@@ -51,7 +51,7 @@ export default function NuevoAnalisisPage() {
   };
 
   return (
-    <div className="px-3 py-4 pb-20">
+    <div className="px-3 py-4 pb-20 bg-background">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <button
@@ -71,7 +71,7 @@ export default function NuevoAnalisisPage() {
       {/* Formulario */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Información básica */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
+        <div className="bg-white border border-gray-200 rounded-lg px-4 py-4">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Información Básica</h3>
           
           <div className="grid grid-cols-1 gap-4">
@@ -274,7 +274,7 @@ export default function NuevoAnalisisPage() {
           </button>
           <button
             type="submit"
-            className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            className="flex-1 px-4 py-2 bg-button-primary text-white rounded-lg hover:opacity-90 transition-colors"
           >
             Guardar Análisis
           </button>

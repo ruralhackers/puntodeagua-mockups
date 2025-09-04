@@ -234,7 +234,7 @@ export default function AnalisisPage() {
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg transition-colors"
+                className="px-4 py-2 bg-button-destructive text-white hover:opacity-90 rounded-lg transition-colors"
               >
                 Eliminar
               </button>

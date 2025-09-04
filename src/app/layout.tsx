@@ -27,6 +27,7 @@ export default function RootLayout({
             <TabBar />
           </div>
         </TabBarProvider>
+
       </body>
     </html>
   );
