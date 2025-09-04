@@ -6,59 +6,84 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, AlertTriangle, CheckCircle, Users, Calendar, Search } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, CheckCircle, Users, Calendar, Search, Filter, X } from 'lucide-react';
 import { FormHeader } from '@/components/ui/form-header';
 import { useTabBar } from '@/contexts/TabBarContext';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { CounterCard, type CounterData } from '@/components/ui/counter-card';
 
 export default function NuevoContadorPage() {
   const router = useRouter();
   const { hideTabBar, showTabBar } = useTabBar();
   const [isLoading, setIsLoading] = useState(false);
-  const [zonaSeleccionada, setZonaSeleccionada] = useState('');
-  const [usuarioSeleccionado, setUsuarioSeleccionado] = useState<any>(null);
+  const [zonaSeleccionada, setZonaSeleccionada] = useState('todas');
+  const [usuarioSeleccionado, setUsuarioSeleccionado] = useState<CounterData | null>(null);
   const [busquedaUsuario, setBusquedaUsuario] = useState('');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [formData, setFormData] = useState({
     fechaActual: new Date().toISOString().split('T')[0],
     lecturaActual: '',
     observaciones: ''
   });
 
-  // Datos de ejemplo
+  // Datos de ejemplo - lista consolidada de todos los usuarios
   const zonas = ['Os Casas', 'Centro', 'Ramis'];
   
-  const usuariosPorZona = {
-    'Os Casas': [
-      { id: 1, nombre: 'María García', apodo: 'Casa del Río', ultimaLectura: '2024-01-15', lecturaAnterior: 125.5, personasRegistradas: 4 },
-      { id: 2, nombre: 'José Fernández', apodo: 'El Molino', ultimaLectura: '2024-01-10', lecturaAnterior: 89.2, personasRegistradas: 2 },
-      { id: 3, nombre: 'Ana Rodríguez', apodo: 'Casa Verde', ultimaLectura: '2024-01-12', lecturaAnterior: 156.8, personasRegistradas: 5 }
-    ],
-    'Centro': [
-      { id: 4, nombre: 'Carlos López', apodo: 'Panadería Central', ultimaLectura: '2024-01-14', lecturaAnterior: 234.1, personasRegistradas: 3 },
-      { id: 5, nombre: 'Elena Martín', apodo: 'Casa Azul', ultimaLectura: '2024-01-11', lecturaAnterior: 178.9, personasRegistradas: 6 },
-      { id: 6, nombre: 'Pedro Sánchez', apodo: 'Bar Central', ultimaLectura: '2024-01-13', lecturaAnterior: 312.4, personasRegistradas: 8 }
-    ],
-    'Ramis': [
-      { id: 7, nombre: 'Lucía Gómez', apodo: 'Finca Alta', ultimaLectura: '2024-01-09', lecturaAnterior: 67.3, personasRegistradas: 2 },
-      { id: 8, nombre: 'Miguel Torres', apodo: 'Casa del Campo', ultimaLectura: '2024-01-16', lecturaAnterior: 145.7, personasRegistradas: 4 },
-      { id: 9, nombre: 'Isabel Ruiz', apodo: 'La Granja', ultimaLectura: '2024-01-08', lecturaAnterior: 203.2, personasRegistradas: 7 }
-    ]
-  };
+  const todosLosUsuarios: CounterData[] = [
+    { id: 1, nombre: 'María García', apodo: 'Casa del Río', zona: 'Os Casas', ultimaLectura: '2024-01-15', lecturaAnterior: 125.245, personasRegistradas: 4 },
+    { id: 2, nombre: 'José Fernández', apodo: 'El Molino', zona: 'Os Casas', ultimaLectura: '2023-10-10', lecturaAnterior: 89.856, personasRegistradas: 2 },
+    { id: 3, nombre: 'Ana Rodríguez', apodo: 'Casa Verde', zona: 'Os Casas', ultimaLectura: '2024-08-12', lecturaAnterior: 156.134, personasRegistradas: 5 },
+    { id: 4, nombre: 'Carlos López', apodo: 'Panadería Central', zona: 'Centro', ultimaLectura: '2024-07-14', lecturaAnterior: 234.567, personasRegistradas: 3 },
+    { id: 5, nombre: 'Elena Martín', apodo: 'Casa Azul', zona: 'Centro', ultimaLectura: '2024-08-11', lecturaAnterior: 278.923, personasRegistradas: 6 },
+    { id: 6, nombre: 'Pedro Sánchez', apodo: 'Bar Central', zona: 'Centro', ultimaLectura: '2023-09-13', lecturaAnterior: 312.445, personasRegistradas: 8 },
+    { id: 7, nombre: 'Lucía Gómez', apodo: 'Finca Alta', zona: 'Ramis', ultimaLectura: '2024-08-09', lecturaAnterior: 67.312, personasRegistradas: 2 },
+    { id: 8, nombre: 'Miguel Torres', apodo: 'Casa del Campo', zona: 'Ramis', ultimaLectura: '2024-08-16', lecturaAnterior: 145.789, personasRegistradas: 4 },
+    { id: 9, nombre: 'Isabel Ruiz', apodo: 'La Granja', zona: 'Ramis', ultimaLectura: '2024-07-08', lecturaAnterior: 203.678, personasRegistradas: 7 }
+  ];
 
   // Filtrar usuarios por zona y búsqueda
   const usuariosFiltrados = useMemo(() => {
-    if (!zonaSeleccionada) return [];
+    let usuarios = todosLosUsuarios;
     
-    const usuarios = usuariosPorZona[zonaSeleccionada as keyof typeof usuariosPorZona] || [];
+    // Filtrar por zona
+    if (zonaSeleccionada !== 'todas') {
+      usuarios = usuarios.filter(usuario => usuario.zona === zonaSeleccionada);
+    }
     
-    if (!busquedaUsuario) return usuarios;
+    // Filtrar por búsqueda
+    if (busquedaUsuario) {
+      usuarios = usuarios.filter(usuario => 
+        usuario.nombre.toLowerCase().includes(busquedaUsuario.toLowerCase()) ||
+        usuario.apodo.toLowerCase().includes(busquedaUsuario.toLowerCase())
+      );
+    }
     
-    return usuarios.filter(usuario => 
-      usuario.nombre.toLowerCase().includes(busquedaUsuario.toLowerCase()) ||
-      usuario.apodo.toLowerCase().includes(busquedaUsuario.toLowerCase())
-    );
+    return usuarios;
   }, [zonaSeleccionada, busquedaUsuario]);
+
+  // Contar filtros activos
+  const activeFiltersCount = [
+    zonaSeleccionada !== 'todas',
+  ].filter(Boolean).length;
+
+  // Limpiar filtros
+  const clearFilters = () => {
+    setZonaSeleccionada('todas');
+  };
+
+  // Toggle search expansion
+  const toggleSearch = () => {
+    if (isSearchExpanded && busquedaUsuario) {
+      return;
+    }
+    setIsSearchExpanded(!isSearchExpanded);
+    if (!isSearchExpanded) {
+      setBusquedaUsuario('');
+    }
+  };
 
   const calcularDiferencia = () => {
     if (!usuarioSeleccionado || !formData.lecturaActual) return 0;
@@ -153,96 +178,116 @@ export default function NuevoContadorPage() {
     handleSave();
   };
 
-  const renderSeleccionUsuario = () => (
-    <div className="space-y-6">
-      {/* Selector de Zona */}
-      <div>
-        <Label className="text-base font-medium text-gray-900 mb-3 block">Zona de Medición</Label>
-        <Select value={zonaSeleccionada} onValueChange={setZonaSeleccionada}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Selecciona la zona" />
-          </SelectTrigger>
-          <SelectContent>
-            {zonas.map((zona) => (
-              <SelectItem key={zona} value={zona}>
-                <div className="flex items-center justify-between w-full">
-                  <span>{zona}</span>
-                  <span className="text-sm text-gray-500 ml-2">
-                    ({usuariosPorZona[zona as keyof typeof usuariosPorZona]?.length || 0} propiedades)
-                  </span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Campo de búsqueda */}
-      {zonaSeleccionada && (
-        <div>
-          <Label className="text-base font-medium text-gray-900 mb-3 block">Buscar Usuario</Label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+  const renderListaContadores = () => (
+    <div className="space-y-4">
+      {/* Search and Filters - Similar to registros/contadores */}
+      <div className="flex gap-3 mb-4">
+        {isSearchExpanded ? (
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               type="text"
-              placeholder="Buscar por nombre o apodo..."
+              placeholder="Buscar por nombre..."
               value={busquedaUsuario}
               onChange={(e) => setBusquedaUsuario(e.target.value)}
-              className="pl-10"
+              className="pl-10 pr-10"
+              autoFocus
             />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleSearch}
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-        </div>
-      )}
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleSearch}
+            className="flex items-center gap-2"
+          >
+            <Search className="h-4 w-4" />
+          </Button>
+        )}
 
-      {/* Lista de usuarios */}
-      {zonaSeleccionada && (
-        <div>
-          <Label className="text-base font-medium text-gray-900 mb-3 block">
-            Seleccionar Usuario ({usuariosFiltrados.length} {usuariosFiltrados.length === 1 ? 'resultado' : 'resultados'})
-          </Label>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {usuariosFiltrados.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                {busquedaUsuario ? 'No se encontraron usuarios con ese criterio de búsqueda' : 'No hay usuarios en esta zona'}
+        <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              Filtrar
+              {activeFiltersCount > 0 && (
+                <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] h-5 flex items-center justify-center">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="w-[90%] rounded-lg">
+            <DialogHeader>
+              <DialogTitle>Filtrar contadores</DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              {/* Zone Filter */}
+              <div>
+                <h3 className="font-medium text-gray-900 mb-3">ZONA</h3>
+                <Select value={zonaSeleccionada} onValueChange={setZonaSeleccionada}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecciona una zona" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todas">Todas las zonas</SelectItem>
+                    {zonas.map((zona) => (
+                      <SelectItem key={zona} value={zona}>
+                        {zona}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            ) : (
-              usuariosFiltrados.map((usuario) => {
-                const diasSinLectura = Math.ceil((new Date().getTime() - new Date(usuario.ultimaLectura).getTime()) / (1000 * 60 * 60 * 24));
-                return (
-                  <button
-                    key={usuario.id}
-                    onClick={() => setUsuarioSeleccionado(usuario)}
-                    className="w-full p-4 bg-white border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left shadow-sm"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="mb-2">
-                          <h3 className="font-semibold text-gray-900">{usuario.nombre}</h3>
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            <span>Última lectura: {usuario.ultimaLectura}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-semibold text-gray-900">{usuario.lecturaAnterior} m³</div>
-                        <div className={`text-sm ${
-                          diasSinLectura > 35 ? 'text-red-600' : 
-                          diasSinLectura > 30 ? 'text-yellow-600' : 'text-green-600'
-                        }`}>
-                          {diasSinLectura} días
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })
-            )}
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex gap-3 mt-6">
+              <Button 
+                variant="outline" 
+                onClick={clearFilters}
+                className="flex-1"
+              >
+                Limpiar
+              </Button>
+              <Button 
+                onClick={() => setIsFilterOpen(false)}
+                className="flex-1"
+              >
+                Aplicar ({usuariosFiltrados.length})
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Lista de contadores */}
+      <div className="space-y-3">
+        {usuariosFiltrados.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            {busquedaUsuario ? 'No se encontraron contadores con ese criterio de búsqueda' : 'No hay contadores disponibles'}
           </div>
-        </div>
-      )}
+        ) : (
+          usuariosFiltrados.map((usuario) => (
+            <CounterCard
+              key={usuario.id}
+              counter={usuario}
+              onClick={setUsuarioSeleccionado}
+              showConsumption={true}
+              dateFormat="natural"
+            />
+          ))
+        )}
+      </div>
     </div>
   );
 
@@ -251,7 +296,7 @@ export default function NuevoContadorPage() {
     return formData.lecturaActual !== '' || formData.observaciones !== '';
   };
 
-  // Manejar navegación con confirmación
+  // Manejar navegación con confirmación - volver a lista de contadores
   const manejarVolver = () => {
     if (hayDatosSinGuardar()) {
       if (window.confirm('¿Estás seguro de que quieres salir? Los datos no guardados se perderán.')) {
@@ -281,7 +326,7 @@ export default function NuevoContadorPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Zona</Label>
-                <Input value={zonaSeleccionada} disabled className="bg-gray-50" />
+                <Input value={usuarioSeleccionado?.zona} disabled className="bg-gray-50" />
               </div>
               <div>
                 <Label>Personas Registradas</Label>
@@ -414,7 +459,7 @@ export default function NuevoContadorPage() {
       {usuarioSeleccionado && (
         <FormHeader
           tipoRegistro="Lectura de Contador"
-          onCancel={handleCancel}
+          onCancel={manejarVolver}
           onSave={handleSave}
           canSave={isFormValid()}
           isLoading={isLoading}
@@ -422,7 +467,7 @@ export default function NuevoContadorPage() {
       )}
 
       {!usuarioSeleccionado ? (
-        <div className="px-4 py-6 bg-background">
+        <div className="px-4 py-6 pb-20 bg-background">
           {/* Header */}
           <div className="mb-6">
             <button
@@ -438,7 +483,7 @@ export default function NuevoContadorPage() {
           </div>
 
           {/* Contenido */}
-          {renderSeleccionUsuario()}
+          {renderListaContadores()}
         </div>
       ) : (
         <div className="px-4 py-6 bg-background">
